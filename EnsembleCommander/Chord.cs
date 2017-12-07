@@ -9,7 +9,10 @@ namespace EnsembleCommander
 { 
     class Chord
     {
-        public NoteEvent[] Notes;
+        /// <summary>
+        /// このコードで演奏されるノート
+        /// </summary>
+        public List<NoteEvent> Notes = new List<NoteEvent>();
         /// <summary>
         /// 根音から2オクターブ下がった音
         /// </summary>
@@ -17,7 +20,11 @@ namespace EnsembleCommander
         /// <summary>
         /// コード全体の演奏開始時間（初期化時点では小節の頭）
         /// </summary>
-        public int Tick;
+        public int TickFromStart;
+        /// <summary>
+        /// ベース音以外のコードの和音数
+        /// </summary>
+        public int NoteCount;
         /// <summary>
         /// コードの構成音のMidiナンバーの平均値.コードの高さ(三和音の平均値)を「コードの軸」と呼ぶことにする
         /// </summary>
@@ -38,7 +45,7 @@ namespace EnsembleCommander
         public Chord(int tick, byte root, String structure)
         {
             //コードの演奏開始時刻を設定
-            Tick = tick;
+            TickFromStart = tick;
 
             //Base音の設定
             Base = new NoteEvent((byte)(root - 24), 80, 240 * 4);//音高，音量，長さ
@@ -46,6 +53,7 @@ namespace EnsembleCommander
 
             byte[] numbers=null;
 
+            //コードの構造から各和音の音高を決定
             switch (structure)
             {
                 case "":
@@ -85,21 +93,22 @@ namespace EnsembleCommander
                     Console.WriteLine("設定していないコードの構造:"+structure);
                     break;
             }
-
             if (numbers != null)
             {
-                Notes = new NoteEvent[numbers.Length];
+                //コードの和音数を記録
+                NoteCount = numbers.Length;
                 for (int i = 0; i < numbers.Length; i++)
                 {
-                    Notes[i] = new NoteEvent(numbers[i], 80, 240 * 4)
+                    Notes.Add(new NoteEvent(numbers[i], 80, 240 * 4)
                     {
                         Tick = tick
-                    };
+                    });
                 }
             }
 
             //平均を計算
-            Pivot = (Notes[0].Note + Notes[1].Note + Notes[2].Note) / 3;
+            foreach (var note in Notes) Pivot += note.Note;
+            Pivot /= Notes.Count;
 
             //Noteナンバーの範囲[0-127]を4つずつ32領域に分割をする
             //ただし伴奏で使う範囲（一度に画面に表示される演奏領域）の数は5と想定

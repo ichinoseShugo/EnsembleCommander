@@ -28,7 +28,10 @@ namespace EnsembleCommander
         bool ArpFlag = false;
         bool Free = false;
 
-        List<Chord> chordlist = new List<Chord>(); // chordlistというChordクラスのリストを用意
+        /// <summary>
+        /// コード進行の各コードのリスト
+        /// </summary>
+        List<Chord> chordlist = new List<Chord>();
 
         PXCMSenseManager senseManager;
         /// <summary>
@@ -62,6 +65,7 @@ namespace EnsembleCommander
         {
             //InitializeRealSense();
             InitializeMIDI(0);
+            InitializeView();
             //WPFのオブジェクトがレンダリングされるタイミング(およそ1秒に50から60)に呼び出される
             //CompositionTarget.Rendering += CompositionTarget_Rendering;
         }
@@ -127,9 +131,21 @@ namespace EnsembleCommander
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        private void MidiOn_Click(object sender, RoutedEventArgs e)
+        private void OnMidi_Click(object sender, RoutedEventArgs e)
         {
             player.Stop();
+            player.Play(domain);
+        }
+
+        /// <summary>
+        /// Midi停止時のイベント
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void Player_Stopped(object sender, EventArgs e)
+        {
+            port.Close();
+            InitializeMIDI(0);
             player.Play(domain);
         }
 
@@ -138,7 +154,7 @@ namespace EnsembleCommander
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        private void MidiOff_Click(object sender, RoutedEventArgs e)
+        private void OffMidi_Click(object sender, RoutedEventArgs e)
         {
             player.Stop();
         }
@@ -161,9 +177,9 @@ namespace EnsembleCommander
                     chordlist[i].Notes[2].Gate = 240 * 4;
                     chordlist[i].Notes[1].Tick -= 240;
                     chordlist[i].Notes[2].Tick -= 480;
-                    chordlist[i].Notes[3].Note = chordlist[i].Base.Note;
-                    chordlist[i].Notes[3].Gate = 240 * 4;
-                    chordlist[i].Notes[3].Tick -= 720;
+                    // chordlist[i].Notes[3].Note = chordlist[i].Base.Note;
+                    // chordlist[i].Notes[3].Gate = 240 * 4;
+                    // chordlist[i].Notes[3].Tick -= 720;
                 }
                 ArpFlag = false;
             }
@@ -218,16 +234,130 @@ namespace EnsembleCommander
                 chordlist[i].Notes[0].Velocity = 0;
                 chordlist[i].Notes[1].Velocity = 0;
                 chordlist[i].Notes[2].Velocity = 0;
-                chordlist[i].Notes[3].Velocity = 0;
+                // chordlist[i].Notes[3].Velocity = 0;
             }
         }
 
         /// <summary>
-        /// ボタン3イベント
+        /// ボタン3イベント：Freeモード時、ボタンを押したタイミングで発音
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
         private void btn3_Click(object sender, RoutedEventArgs e)
+        {
+            // タップで発音
+            if (Free == true)
+            {
+                //この時の和音だけを鳴らす。
+                MusicTime current = player.MusicTime; // 現在(Tap時)の演奏カーソルを取得
+                System.Console.WriteLine("curent 小節: " + current.Measure + ", Tick: " + current.Tick);
+                System.Console.WriteLine("Notes.Tick:" + chordlist[current.Measure].Notes[0].Tick);
+
+                chordlist[current.Measure].Notes[0].Tick = tickUnit * current.Measure + current.Tick + 1;
+                chordlist[current.Measure].Notes[1].Tick = tickUnit * current.Measure + current.Tick + 1;
+                chordlist[current.Measure].Notes[2].Tick = tickUnit * current.Measure + current.Tick + 1;
+                // chordlist[current.Measure].Notes[3].Tick = tickUnit * current.Measure + current.Tick + 1;
+                chordlist[current.Measure].Notes[0].Velocity = 80;
+                chordlist[current.Measure].Notes[1].Velocity = 80;
+                chordlist[current.Measure].Notes[2].Velocity = 80;
+                // chordlist[current.Measure].Notes[3].Velocity = 80;
+
+                chordlist[current.Measure].Notes[0].Gate = 240;
+                chordlist[current.Measure].Notes[1].Gate = 240;
+                chordlist[current.Measure].Notes[2].Gate = 240;
+                // chordlist[current.Measure].Notes[3].Gate = 240;
+
+                chordlist[current.Measure].Notes[0].Speed = 120;
+                chordlist[current.Measure].Notes[1].Speed = 120;
+                chordlist[current.Measure].Notes[2].Speed = 120;
+                // chordlist[current.Measure].Notes[3].Speed = 120;
+
+            }
+        }
+
+        /// <summary>
+        /// WholeToneモード:全音符(初期設定と同じ)
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void OnWholeTone_Click(object sender, RoutedEventArgs e)
+        {
+            WholeFlag = true;
+
+            if (ArpFlag == true) // アルペジオ伴奏の場合
+            {
+                for (int i = 0; i < chordlist.Count; i++)
+                {
+                    chordlist[i].Notes[0].Gate = 240 * 4;
+                    chordlist[i].Notes[1].Gate = 240 * 4;
+                    chordlist[i].Notes[2].Gate = 240 * 4;
+                    chordlist[i].Notes[1].Tick -= 240;
+                    chordlist[i].Notes[2].Tick -= 480;
+                    chordlist[i].Notes[3].Note = chordlist[i].Base.Note;
+                    chordlist[i].Notes[3].Gate = 240 * 4;
+                    chordlist[i].Notes[3].Tick -= 720;
+                }
+                ArpFlag = false;
+            }
+        }
+
+        /// <summary>
+        /// Arpeggioモード:分散和音
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void OnArpeggio_Click(object sender, RoutedEventArgs e)
+        {
+            ArpFlag = true;
+            if (WholeFlag == true) // 全音符伴奏の場合
+            {
+                foreach (var chord in chordlist)
+                {
+                    //三和音なら4拍目に最初の音を追加する
+                    if (chord.Notes.Count != 4)
+                    {
+                        //リストに最初の音を追加
+                        chord.Notes.Add((NoteEvent)chord.Notes[0].Clone());
+                        //トラックに追加の音を挿入
+                        domain.MidiData.Tracks[0].Insert(chord.Notes[chord.Notes.Count-1]);
+                    }
+
+                    for (int i = 0; i < chord.Notes.Count; i++)
+                    {
+                        int gate = chord.Notes[i].Gate / 4;
+                        chord.Notes[i].Gate = gate;
+                        chord.Notes[i].Tick += gate * i;
+                    }
+                }
+                WholeFlag = false;
+            }
+        }
+
+        /// <summary>
+        /// Freeモード:任意のタイミングで発音
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void OnFree_Click(object sender, RoutedEventArgs e)
+        {
+            Free = true;
+            for (int i = 0; i < chordlist.Count; i++)
+            {
+                Rbtn1_Checked(sender, e); // Alpggioの場合一度WholeNoteに戻す
+
+                chordlist[i].Notes[0].Velocity = 0;
+                chordlist[i].Notes[1].Velocity = 0;
+                chordlist[i].Notes[2].Velocity = 0;
+                chordlist[i].Notes[3].Velocity = 0;
+            }
+        }
+        
+        /// <summary>
+        /// Freeモード時にクリックで発音
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void OnNote_Click(object sender, RoutedEventArgs e)
         {
             // タップで発音
             if (Free == true)
@@ -260,226 +390,14 @@ namespace EnsembleCommander
         }
 
         /// <summary>
-        /// 次の小節の高さ(PivotRange)の決定
+        /// ListBoxのitemが変わった時のイベント
         /// </summary>
-        int Range;
-
-        //  Range1 : pivot < 52
-        private void TurnRbtn1_Checked(object sender, RoutedEventArgs e)
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void PivotList_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            Range = 1;
-            MusicTime current = player.MusicTime;
-
-            System.Console.WriteLine("Range = " + Range + "\n chordlist[次の小節].PivotRange" + chordlist[current.Measure + 1].PivotRange);
-            for (int i = current.Measure + 1; i < chordlist.Count; i++)
-            {
-                switch (Range - chordlist[i].PivotRange)
-                {
-                    case 2:
-                        Turn(2, i);
-                        break;
-                    case 1:
-                        Turn(1, i);
-                        break;
-                    case 0:
-                        // 次の小節のコードのPivotRangeと指定Range(=1)が同じ
-                        break;
-                    case -1:
-                        // 次の小節のコードのPivotRangeが指定Range(=1)より1高い
-                        // Turnメソッドで-1転回する
-                        Turn(-1, i);
-                        break;
-                    case -2:
-                        Turn(-2, i);
-                        break;
-                    case -3:
-                        Turn(-3, i);
-                        break;
-                    case -4:
-                        Turn(-4, i);
-                        break;
-                    case -5:
-                        Turn(-5, i);
-                        break;
-                    case -6:
-                        Turn(-6, i);
-                        break;
-
-                }
-                System.Console.WriteLine(i + "小節目のコードのPivotRangeは" + chordlist[i].PivotRange);
-            }
-
+            setRange((int)PivotList.SelectedItem);
         }
-
-        // Range2 : 52 <= pivot < 56
-        private void TurnRbtn2_Checked(object sender, RoutedEventArgs e)
-        {
-            Range = 2;
-            MusicTime current = player.MusicTime;
-
-            for (int i = current.Measure + 1; i < chordlist.Count; i++)
-            {
-                switch (Range - chordlist[i].PivotRange)
-                {
-                    case 3:
-                        Turn(3, i);
-                        break;
-                    case 2:
-                        Turn(2, i);
-                        break;
-                    case 1:
-                        Turn(1, i);
-                        break;
-                    case 0:
-                        break;
-                    case -1:
-                        Turn(-1, i);
-                        break;
-                    case -2:
-                        Turn(-2, i);
-                        break;
-                    case -3:
-                        Turn(-3, i);
-                        break;
-                    case -4:
-                        Turn(-4, i);
-                        break;
-                    case -5:
-                        Turn(-5, i);
-                        break;
-                }
-                System.Console.WriteLine(i + "小節目のコードのPivotRangeは" + chordlist[i].PivotRange);
-            }
-        }
-
-        // Range3 : 56 <= pivot < 60
-        private void TurnRbtn3_Checked(object sender, RoutedEventArgs e)
-        {
-            Range = 3;
-            MusicTime current = player.MusicTime;
-
-            for (int i = current.Measure + 1; i < chordlist.Count; i++)
-            {
-                switch (Range - chordlist[i].PivotRange)
-                {
-                    case 4:
-                        Turn(4, i);
-                        break;
-                    case 3:
-                        Turn(3, i);
-                        break;
-                    case 2:
-                        Turn(2, i);
-                        break;
-                    case 1:
-                        Turn(1, i);
-                        break;
-                    case 0:
-                        break;
-                    case -1:
-                        Turn(-1, i);
-                        break;
-                    case -2:
-                        Turn(-2, i);
-                        break;
-                    case -3:
-                        Turn(-3, i);
-                        break;
-                    case -4:
-                        Turn(-4, i);
-                        break;
-                }
-                System.Console.WriteLine(i + "小節目のコードのPivotRangeは" + chordlist[i].PivotRange);
-            }
-        }
-
-        // Range4 : 60 <= pivot < 64
-        private void TurnRbtn4_Checked(object sender, RoutedEventArgs e)
-        {
-            Range = 4;
-            MusicTime current = player.MusicTime;
-
-            for (int i = current.Measure + 1; i < chordlist.Count; i++)
-            {
-                switch (Range - chordlist[i].PivotRange)
-                {
-                    case 5:
-                        Turn(5, i);
-                        break;
-                    case 4:
-                        Turn(4, i);
-                        break;
-                    case 3:
-                        Turn(3, i);
-                        break;
-                    case 2:
-                        Turn(2, i);
-                        break;
-                    case 1:
-                        Turn(1, i);
-                        break;
-                    case 0:
-                        break;
-                    case -1:
-                        Turn(-1, i);
-                        break;
-                    case -2:
-                        Turn(-2, i);
-                        break;
-                    case -3:
-                        Turn(-3, i);
-                        break;
-                }
-                System.Console.WriteLine(i + "小節目のコードのPivotRangeは" + chordlist[i].PivotRange);
-                System.Console.WriteLine("Note[0]:" + chordlist[i].Notes[0].Note);
-                System.Console.WriteLine("Note[1]:" + chordlist[i].Notes[1].Note);
-                System.Console.WriteLine("Note[2]:" + chordlist[i].Notes[2].Note);
-
-            }
-        }
-
-        // Range5 : 64 <= pivot
-        private void TurnRbtn5_Checked(object sender, RoutedEventArgs e)
-        {
-            Range = 5;
-            MusicTime current = player.MusicTime;
-
-            for (int i = current.Measure + 1; i < chordlist.Count; i++)
-            {
-                switch (Range - chordlist[i].PivotRange)
-                {
-                    case 6:
-                        Turn(6, i);
-                        break;
-                    case 5:
-                        Turn(5, i);
-                        break;
-                    case 4:
-                        Turn(4, i);
-                        break;
-                    case 3:
-                        Turn(3, i);
-                        break;
-                    case 2:
-                        Turn(2, i);
-                        break;
-                    case 1:
-                        Turn(1, i);
-                        break;
-                    case 0:
-                        break;
-                    case -1:
-                        Turn(-1, i);
-                        break;
-                    case -2:
-                        Turn(-2, i);
-                        break;
-                }
-                System.Console.WriteLine(i + "小節目のコードのPivotRangeは" + chordlist[i].PivotRange);
-            }
-        }
-
-        //RealSenseメソッド-------------------------------------------------------------------
 
         /// <summary>
         /// 一番最初に呼び出される部分
@@ -488,6 +406,8 @@ namespace EnsembleCommander
         {
             InitializeComponent();
         }
+
+        //RealSenseメソッド-------------------------------------------------------------------
 
         /// <summary>
         /// 機能の初期化
@@ -641,7 +561,7 @@ namespace EnsembleCommander
                 {
                     continue;
                 }
-                
+
                 // 指の関節を列挙する
                 for (int j = 0; j < PXCMHandData.NUMBER_OF_JOINTS; j++)
                 {
@@ -669,7 +589,7 @@ namespace EnsembleCommander
 
             }
         }
-        
+
         /// <summary>
         /// 円を表示する
         /// </summary>
@@ -744,9 +664,12 @@ namespace EnsembleCommander
         /// <param name="portnum"></param>
         void InitializeMIDI(int portnum)
         {
+            //コードリストの初期化
+            chordlist.Clear();
+
             // Midiデータの作成
             String[] chordProgress = { "C", "Am", "F", "G", "Em", "F", "G", "C" }; //背景楽曲のコード進行配列
-            MidiData midiData = new MidiData(); 
+            MidiData midiData = new MidiData();
             MidiTrack track = new MidiTrack(); //各楽器が見る楽譜
             midiData.Tracks.Add(track); //midiDataにtrackを対応付け
 
@@ -761,7 +684,7 @@ namespace EnsembleCommander
                 getStructure(chordName, out root, out structure);
 
                 // newでインスタンスを作成し、変数chordに格納
-                Chord chord = new Chord(tick, root, structure); 
+                Chord chord = new Chord(tick, root, structure);
 
                 track.Insert(chord.Base);//低い根音
                 foreach (var note in chord.Notes) track.Insert(note);
@@ -786,6 +709,18 @@ namespace EnsembleCommander
             // テンポマップを作成
             domain = new MidiFileDomain(midiData);
             player = new MidiPlayer(port);
+            player.Stopped += Player_Stopped;
+        }
+
+        /// <summary>
+        /// ボタンなどの初期化
+        /// </summary>
+        void InitializeView()
+        {
+            int[] Ranges = new int[16];
+            for (int i = 0; i < 16; i++) Ranges[i] = 31 - (i + 8);
+            PivotList.ItemsSource = null;
+            PivotList.ItemsSource = Ranges;
         }
 
         /// <summary>
@@ -803,7 +738,7 @@ namespace EnsembleCommander
             }
             else if (chordName.StartsWith("C#") || chordName.StartsWith("Db"))
             {
-                structure = chordName.Remove(0,2);
+                structure = chordName.Remove(0, 2);
                 root = 61;
             }
             else if (chordName.StartsWith("D"))
@@ -880,6 +815,23 @@ namespace EnsembleCommander
         }
 
         /// <summary>
+        /// ユーザ指定したRangeにコードを転回してPivotRangeを移動する
+        /// </summary>
+        public void setRange(int Range)
+        {
+            MusicTime current = player.MusicTime; // 現在の演奏カーソルを取得
+
+            // 次の小節のコードのPivotRangeとユーザが指定したRangeとの差分だけ転回
+            // 次の小節からそれ以降の小節まで
+            for (int i = current.Measure; i < chordlist.Count; i++)
+            {
+                //ユーザが指定したRangeとの差分だけ転回
+                Turn(Range - chordlist[i].PivotRange, i);
+                Console.WriteLine(i + "小節目のコードのPivotRangeは" + chordlist[i].PivotRange);
+            }
+        }
+
+        /// <summary>
         /// 転回メソッド : i小節目のコードをk回だけ転回する
         /// </summary>
         /// <param name="k"></param>
@@ -919,7 +871,7 @@ namespace EnsembleCommander
                         break;
                     }
                 }
-                
+
             }
 
             if (k < 0) // -k転回
