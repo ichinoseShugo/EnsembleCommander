@@ -19,6 +19,7 @@
                 <RadioButton x:Name="OnArpeggio" Content="OnArpeggio" Margin="5" Click="OnArpeggio_Click"/>
                 <RadioButton x:Name="OnFree" Content="OnFree" Margin="5" Click="OnFree_Click"/>
             </StackPanel>
+            <Button Name="OnNote" Content="Tap" Click="OnNote_Click"/>
         </StackPanel>
         <ListBox Name="PivotList" Width="320" SelectionChanged="PivotList_SelectionChanged"/>
         <Grid Width="640">

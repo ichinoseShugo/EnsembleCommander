@@ -25,7 +25,6 @@ namespace EnsembleCommander
         MidiOutPort port;
         MidiPlayer player;
         MidiFileDomain domain;
-        bool Free = false;
 
         /// <summary>
         /// 一小節の時間
@@ -176,7 +175,7 @@ namespace EnsembleCommander
         /// <param name="e"></param>
         private void Rbtn3_Checked(object sender, RoutedEventArgs e)
         {
-            Free = true;
+            //Free = true;
             for (int i = 0; i < chordlist.Count; i++)
             {
                 //Rbtn1_Checked(sender, e); // Alpggioの場合一度WholeNoteに戻す
@@ -196,7 +195,7 @@ namespace EnsembleCommander
         private void btn3_Click(object sender, RoutedEventArgs e)
         {
             // タップで発音
-            if (Free == true)
+            if (true)
             {
                 //この時の和音だけを鳴らす。
                 MusicTime current = player.MusicTime; // 現在(Tap時)の演奏カーソルを取得
@@ -232,23 +231,7 @@ namespace EnsembleCommander
         /// <param name="e"></param>
         private void OnWholeTone_Click(object sender, RoutedEventArgs e)
         {
-            foreach(var chord in chordlist)
-            {
-                //コードの和音の数とノートリストの数が合わなければ
-                //(現時点ではアルペジオによって三和音でも4つのノートが鳴る場合)
-                if (chord.NoteCount < chord.Notes.Count)
-                {
-                    //トラックから音を削除
-                    domain.MidiData.Tracks[0].Remove(chord.Notes[chord.Notes.Count - 1]);
-                    //リストから音を削除
-                    chord.Notes.Remove(chord.Notes[chord.Notes.Count-1]);
-                }
-                foreach (var note in chord.Notes)
-                {
-                    note.Gate = tickUnit; //音の長さを一小節の時間に
-                    note.Tick = chord.TickFromStart; //TickのタイミングをchordのTickと合わせる
-                }
-            }
+            SetWholeTone();
         }
 
         /// <summary>
@@ -258,24 +241,7 @@ namespace EnsembleCommander
         /// <param name="e"></param>
         private void OnArpeggio_Click(object sender, RoutedEventArgs e)
         {
-            foreach (var chord in chordlist)
-            {
-                //三和音なら4拍目に最初の音を追加する
-                if (chord.Notes.Count != 4)
-                {
-                    //リストに最初の音を追加
-                    chord.Notes.Add((NoteEvent)chord.Notes[0].Clone());
-                    //トラックに追加の音を挿入
-                    domain.MidiData.Tracks[0].Insert(chord.Notes[chord.Notes.Count - 1]);
-                }
-
-                for (int i = 0; i < chord.Notes.Count; i++)
-                {
-                    int gate = chord.Notes[i].Gate / 4;
-                    chord.Notes[i].Gate = gate;
-                    chord.Notes[i].Tick += gate * i;
-                }
-            }
+            SetArpeggio();
         }
 
         /// <summary>
@@ -285,18 +251,10 @@ namespace EnsembleCommander
         /// <param name="e"></param>
         private void OnFree_Click(object sender, RoutedEventArgs e)
         {
-            Free = true;
-            for (int i = 0; i < chordlist.Count; i++)
-            {
-                //Rbtn1_Checked(sender, e); // Alpggioの場合一度WholeNoteに戻す
-
-                chordlist[i].Notes[0].Velocity = 0;
-                chordlist[i].Notes[1].Velocity = 0;
-                chordlist[i].Notes[2].Velocity = 0;
-                chordlist[i].Notes[3].Velocity = 0;
-            }
+            // Alpggioの場合一度WholeNoteに戻す
+            SetWholeTone();
         }
-        
+
         /// <summary>
         /// Freeモード時にクリックで発音
         /// </summary>
@@ -304,33 +262,17 @@ namespace EnsembleCommander
         /// <param name="e"></param>
         private void OnNote_Click(object sender, RoutedEventArgs e)
         {
-            // タップで発音
-            if (Free == true)
+            //Freeモードでないなら終了
+            if (OnFree.IsChecked == false) return;
+
+            //タップタイミングの1ms後のタイミングに演奏音を書き換え
+            MusicTime current = player.MusicTime; // 現在(Tap時)の演奏カーソルを取得
+            foreach(var note in chordlist[current.Measure].Notes)
             {
-                //この時の和音だけを鳴らす。
-                MusicTime current = player.MusicTime; // 現在(Tap時)の演奏カーソルを取得
-                System.Console.WriteLine("curent 小節: " + current.Measure + ", Tick: " + current.Tick);
-                System.Console.WriteLine("Notes.Tick:" + chordlist[current.Measure].Notes[0].Tick);
-
-                chordlist[current.Measure].Notes[0].Tick = tickUnit * current.Measure + current.Tick + 1;
-                chordlist[current.Measure].Notes[1].Tick = tickUnit * current.Measure + current.Tick + 1;
-                chordlist[current.Measure].Notes[2].Tick = tickUnit * current.Measure + current.Tick + 1;
-                chordlist[current.Measure].Notes[3].Tick = tickUnit * current.Measure + current.Tick + 1;
-                chordlist[current.Measure].Notes[0].Velocity = 80;
-                chordlist[current.Measure].Notes[1].Velocity = 80;
-                chordlist[current.Measure].Notes[2].Velocity = 80;
-                chordlist[current.Measure].Notes[3].Velocity = 80;
-
-                chordlist[current.Measure].Notes[0].Gate = 240;
-                chordlist[current.Measure].Notes[1].Gate = 240;
-                chordlist[current.Measure].Notes[2].Gate = 240;
-                chordlist[current.Measure].Notes[3].Gate = 240;
-
-                chordlist[current.Measure].Notes[0].Speed = 120;
-                chordlist[current.Measure].Notes[1].Speed = 120;
-                chordlist[current.Measure].Notes[2].Speed = 120;
-                chordlist[current.Measure].Notes[3].Speed = 120;
-
+                note.Tick = tickUnit * current.Measure + current.Tick + 1;
+                note.Velocity = 80;
+                note.Gate = 240;
+                note.Speed = 120;
             }
         }
 
@@ -848,6 +790,55 @@ namespace EnsembleCommander
                 }
             }
 
+        }
+
+        /// <summary>
+        /// コード進行を全音表記に
+        /// </summary>
+        public void SetWholeTone()
+        {
+            foreach (var chord in chordlist)
+            {
+                //コードの和音の数とノートリストの数が合わなければ
+                //(現時点ではアルペジオによって三和音でも4つのノートが鳴る場合)
+                if (chord.NoteCount < chord.Notes.Count)
+                {
+                    //トラックから音を削除
+                    domain.MidiData.Tracks[0].Remove(chord.Notes[chord.Notes.Count - 1]);
+                    //リストから音を削除
+                    chord.Notes.Remove(chord.Notes[chord.Notes.Count - 1]);
+                }
+                foreach (var note in chord.Notes)
+                {
+                    note.Gate = tickUnit; //音の長さを一小節の時間に
+                    note.Tick = chord.TickFromStart; //TickのタイミングをchordのTickと合わせる
+                }
+            }
+        }
+
+        /// <summary>
+        /// コード進行をアルペジオに
+        /// </summary>
+        public void SetArpeggio()
+        {
+            foreach (var chord in chordlist)
+            {
+                //三和音なら4拍目に最初の音を追加する
+                if (chord.Notes.Count != 4)
+                {
+                    //リストに最初の音を追加
+                    chord.Notes.Add((NoteEvent)chord.Notes[0].Clone());
+                    //トラックに追加の音を挿入
+                    domain.MidiData.Tracks[0].Insert(chord.Notes[chord.Notes.Count - 1]);
+                }
+                //ノートをアルペジオに
+                for (int i = 0; i < chord.Notes.Count; i++)
+                {
+                    int gate = chord.Notes[i].Gate / 4;
+                    chord.Notes[i].Gate = gate;
+                    chord.Notes[i].Tick += gate * i;
+                }
+            }
         }
     }
 }
