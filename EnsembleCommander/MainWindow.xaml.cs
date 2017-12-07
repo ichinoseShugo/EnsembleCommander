@@ -28,6 +28,11 @@ namespace EnsembleCommander
         bool Free = false;
 
         /// <summary>
+        /// 一小節の時間
+        /// </summary>
+        public int tickUnit = 240 * 4;
+
+        /// <summary>
         /// コード進行の各コードのリスト
         /// </summary>
         List<Chord> chordlist = new List<Chord>();
@@ -227,16 +232,22 @@ namespace EnsembleCommander
         /// <param name="e"></param>
         private void OnWholeTone_Click(object sender, RoutedEventArgs e)
         {
-            for (int i = 0; i < chordlist.Count; i++)
+            foreach(var chord in chordlist)
             {
-                chordlist[i].Notes[0].Gate = 240 * 4;
-                chordlist[i].Notes[1].Gate = 240 * 4;
-                chordlist[i].Notes[2].Gate = 240 * 4;
-                chordlist[i].Notes[1].Tick -= 240;
-                chordlist[i].Notes[2].Tick -= 480;
-                chordlist[i].Notes[3].Note = chordlist[i].Base.Note;
-                chordlist[i].Notes[3].Gate = 240 * 4;
-                chordlist[i].Notes[3].Tick -= 720;
+                //コードの和音の数とノートリストの数が合わなければ
+                //(現時点ではアルペジオによって三和音でも4つのノートが鳴る場合)
+                if (chord.NoteCount < chord.Notes.Count)
+                {
+                    //トラックから音を削除
+                    domain.MidiData.Tracks[0].Remove(chord.Notes[chord.Notes.Count - 1]);
+                    //リストから音を削除
+                    chord.Notes.Remove(chord.Notes[chord.Notes.Count-1]);
+                }
+                foreach (var note in chord.Notes)
+                {
+                    note.Gate = tickUnit; //音の長さを一小節の時間に
+                    note.Tick = chord.TickFromStart; //TickのタイミングをchordのTickと合わせる
+                }
             }
         }
 
@@ -588,11 +599,6 @@ namespace EnsembleCommander
         //MIDIメソッド-----------------------------------------------------------
 
         /// <summary>
-        /// 一小節の時間
-        /// </summary>
-        public int tickUnit = 240 * 4;
-
-        /// <summary>
         /// MIDIの初期化
         /// </summary>
         /// <param name="portnum"></param>
@@ -626,7 +632,6 @@ namespace EnsembleCommander
                 chordlist.Add(chord); // chordをリストchordlistに追加
                 tick += tickUnit; //一小節進む
             }
-
             //showAllStructure();
 
             port = new MidiOutPort(portnum);
