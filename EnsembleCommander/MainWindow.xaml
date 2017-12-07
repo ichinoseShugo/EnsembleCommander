@@ -15,7 +15,7 @@
             </StackPanel>
             <Label Content="MODE"/>
             <StackPanel Orientation="Horizontal">
-                <RadioButton x:Name="OnWholeTone" Content="OnWholeTone" Margin="5" Click="OnWholeTone_Click"/>
+                <RadioButton x:Name="OnWholeTone" IsChecked="True" Content="OnWholeTone" Margin="5" Click="OnWholeTone_Click"/>
                 <RadioButton x:Name="OnArpeggio" Content="OnArpeggio" Margin="5" Click="OnArpeggio_Click"/>
                 <RadioButton x:Name="OnFree" Content="OnFree" Margin="5" Click="OnFree_Click"/>
             </StackPanel>

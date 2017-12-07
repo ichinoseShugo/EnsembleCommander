@@ -13,6 +13,7 @@ using NextMidi.DataElement;
 using NextMidi.Filing.Midi;
 using NextMidi.MidiPort.Output;
 using NextMidi.Time;
+using System.Threading.Tasks;
 
 namespace EnsembleCommander
 {
@@ -24,8 +25,6 @@ namespace EnsembleCommander
         MidiOutPort port;
         MidiPlayer player;
         MidiFileDomain domain;
-        bool WholeFlag = true;
-        bool ArpFlag = false;
         bool Free = false;
 
         /// <summary>
@@ -146,6 +145,12 @@ namespace EnsembleCommander
         {
             port.Close();
             InitializeMIDI(0);
+            OnWholeTone.Dispatcher.BeginInvoke(
+             new Action(() =>
+             {
+                 OnWholeTone.IsChecked = true;
+             })
+            );
             player.Play(domain);
         }
 
@@ -160,66 +165,6 @@ namespace EnsembleCommander
         }
 
         /// <summary>
-        /// 全音符(WholeNote)ボタンイベント
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private void Rbtn1_Checked(object sender, RoutedEventArgs e)
-        {
-            WholeFlag = true;
-
-            if (ArpFlag == true) // アルペジオ伴奏の場合
-            {
-                for (int i = 0; i < chordlist.Count; i++)
-                {
-                    chordlist[i].Notes[0].Gate = 240 * 4;
-                    chordlist[i].Notes[1].Gate = 240 * 4;
-                    chordlist[i].Notes[2].Gate = 240 * 4;
-                    chordlist[i].Notes[1].Tick -= 240;
-                    chordlist[i].Notes[2].Tick -= 480;
-                    // chordlist[i].Notes[3].Note = chordlist[i].Base.Note;
-                    // chordlist[i].Notes[3].Gate = 240 * 4;
-                    // chordlist[i].Notes[3].Tick -= 720;
-                }
-                ArpFlag = false;
-            }
-        }
-
-        /// <summary>
-        /// 分散和音(Arpeggioボタン)ボタンイベント
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private void Rbtn2_Checked(object sender, RoutedEventArgs e)
-        {
-            // Noteの小さい順に鳴らすようにする？
-            // [3]には一番低い音の+12となる数値を代入する？
-
-            // MEMO...Gate:音の長さ  Tick:発音時刻  Velocity:音の大きさ
-            ArpFlag = true;
-            if (WholeFlag == true) // 全音符伴奏の場合
-            {
-                for (int i = 0; i < chordlist.Count; i++)
-                {
-                    chordlist[i].Notes[0].Gate = 240;
-                    chordlist[i].Notes[1].Gate = 240;
-                    chordlist[i].Notes[2].Gate = 240;
-                    chordlist[i].Notes[1].Tick += 240;
-                    chordlist[i].Notes[2].Tick += 480;
-                    chordlist[i].Notes[3].Note = chordlist[i].Notes[0].Note;
-                    chordlist[i].Notes[3].Gate = 240;
-                    chordlist[i].Notes[3].Tick += 720;
-
-                }
-                WholeFlag = false;
-            }
-
-
-            // player.Stop();
-            // player.Play(domain2);
-        }
-
-        /// <summary>
         /// 任意タイミングでの発音(Freeボタン)イベント
         /// </summary>
         /// <param name="sender"></param>
@@ -229,7 +174,7 @@ namespace EnsembleCommander
             Free = true;
             for (int i = 0; i < chordlist.Count; i++)
             {
-                Rbtn1_Checked(sender, e); // Alpggioの場合一度WholeNoteに戻す
+                //Rbtn1_Checked(sender, e); // Alpggioの場合一度WholeNoteに戻す
 
                 chordlist[i].Notes[0].Velocity = 0;
                 chordlist[i].Notes[1].Velocity = 0;
@@ -282,22 +227,16 @@ namespace EnsembleCommander
         /// <param name="e"></param>
         private void OnWholeTone_Click(object sender, RoutedEventArgs e)
         {
-            WholeFlag = true;
-
-            if (ArpFlag == true) // アルペジオ伴奏の場合
+            for (int i = 0; i < chordlist.Count; i++)
             {
-                for (int i = 0; i < chordlist.Count; i++)
-                {
-                    chordlist[i].Notes[0].Gate = 240 * 4;
-                    chordlist[i].Notes[1].Gate = 240 * 4;
-                    chordlist[i].Notes[2].Gate = 240 * 4;
-                    chordlist[i].Notes[1].Tick -= 240;
-                    chordlist[i].Notes[2].Tick -= 480;
-                    chordlist[i].Notes[3].Note = chordlist[i].Base.Note;
-                    chordlist[i].Notes[3].Gate = 240 * 4;
-                    chordlist[i].Notes[3].Tick -= 720;
-                }
-                ArpFlag = false;
+                chordlist[i].Notes[0].Gate = 240 * 4;
+                chordlist[i].Notes[1].Gate = 240 * 4;
+                chordlist[i].Notes[2].Gate = 240 * 4;
+                chordlist[i].Notes[1].Tick -= 240;
+                chordlist[i].Notes[2].Tick -= 480;
+                chordlist[i].Notes[3].Note = chordlist[i].Base.Note;
+                chordlist[i].Notes[3].Gate = 240 * 4;
+                chordlist[i].Notes[3].Tick -= 720;
             }
         }
 
@@ -308,28 +247,23 @@ namespace EnsembleCommander
         /// <param name="e"></param>
         private void OnArpeggio_Click(object sender, RoutedEventArgs e)
         {
-            ArpFlag = true;
-            if (WholeFlag == true) // 全音符伴奏の場合
+            foreach (var chord in chordlist)
             {
-                foreach (var chord in chordlist)
+                //三和音なら4拍目に最初の音を追加する
+                if (chord.Notes.Count != 4)
                 {
-                    //三和音なら4拍目に最初の音を追加する
-                    if (chord.Notes.Count != 4)
-                    {
-                        //リストに最初の音を追加
-                        chord.Notes.Add((NoteEvent)chord.Notes[0].Clone());
-                        //トラックに追加の音を挿入
-                        domain.MidiData.Tracks[0].Insert(chord.Notes[chord.Notes.Count-1]);
-                    }
-
-                    for (int i = 0; i < chord.Notes.Count; i++)
-                    {
-                        int gate = chord.Notes[i].Gate / 4;
-                        chord.Notes[i].Gate = gate;
-                        chord.Notes[i].Tick += gate * i;
-                    }
+                    //リストに最初の音を追加
+                    chord.Notes.Add((NoteEvent)chord.Notes[0].Clone());
+                    //トラックに追加の音を挿入
+                    domain.MidiData.Tracks[0].Insert(chord.Notes[chord.Notes.Count - 1]);
                 }
-                WholeFlag = false;
+
+                for (int i = 0; i < chord.Notes.Count; i++)
+                {
+                    int gate = chord.Notes[i].Gate / 4;
+                    chord.Notes[i].Gate = gate;
+                    chord.Notes[i].Tick += gate * i;
+                }
             }
         }
 
@@ -343,7 +277,7 @@ namespace EnsembleCommander
             Free = true;
             for (int i = 0; i < chordlist.Count; i++)
             {
-                Rbtn1_Checked(sender, e); // Alpggioの場合一度WholeNoteに戻す
+                //Rbtn1_Checked(sender, e); // Alpggioの場合一度WholeNoteに戻す
 
                 chordlist[i].Notes[0].Velocity = 0;
                 chordlist[i].Notes[1].Velocity = 0;
@@ -827,7 +761,6 @@ namespace EnsembleCommander
             {
                 //ユーザが指定したRangeとの差分だけ転回
                 Turn(Range - chordlist[i].PivotRange, i);
-                Console.WriteLine(i + "小節目のコードのPivotRangeは" + chordlist[i].PivotRange);
             }
         }
 
