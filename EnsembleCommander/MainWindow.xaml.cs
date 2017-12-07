@@ -169,62 +169,6 @@ namespace EnsembleCommander
         }
 
         /// <summary>
-        /// 任意タイミングでの発音(Freeボタン)イベント
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private void Rbtn3_Checked(object sender, RoutedEventArgs e)
-        {
-            //Free = true;
-            for (int i = 0; i < chordlist.Count; i++)
-            {
-                //Rbtn1_Checked(sender, e); // Alpggioの場合一度WholeNoteに戻す
-
-                chordlist[i].Notes[0].Velocity = 0;
-                chordlist[i].Notes[1].Velocity = 0;
-                chordlist[i].Notes[2].Velocity = 0;
-                // chordlist[i].Notes[3].Velocity = 0;
-            }
-        }
-
-        /// <summary>
-        /// ボタン3イベント：Freeモード時、ボタンを押したタイミングで発音
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private void btn3_Click(object sender, RoutedEventArgs e)
-        {
-            // タップで発音
-            if (true)
-            {
-                //この時の和音だけを鳴らす。
-                MusicTime current = player.MusicTime; // 現在(Tap時)の演奏カーソルを取得
-                System.Console.WriteLine("curent 小節: " + current.Measure + ", Tick: " + current.Tick);
-                System.Console.WriteLine("Notes.Tick:" + chordlist[current.Measure].Notes[0].Tick);
-
-                chordlist[current.Measure].Notes[0].Tick = tickUnit * current.Measure + current.Tick + 1;
-                chordlist[current.Measure].Notes[1].Tick = tickUnit * current.Measure + current.Tick + 1;
-                chordlist[current.Measure].Notes[2].Tick = tickUnit * current.Measure + current.Tick + 1;
-                // chordlist[current.Measure].Notes[3].Tick = tickUnit * current.Measure + current.Tick + 1;
-                chordlist[current.Measure].Notes[0].Velocity = 80;
-                chordlist[current.Measure].Notes[1].Velocity = 80;
-                chordlist[current.Measure].Notes[2].Velocity = 80;
-                // chordlist[current.Measure].Notes[3].Velocity = 80;
-
-                chordlist[current.Measure].Notes[0].Gate = 240;
-                chordlist[current.Measure].Notes[1].Gate = 240;
-                chordlist[current.Measure].Notes[2].Gate = 240;
-                // chordlist[current.Measure].Notes[3].Gate = 240;
-
-                chordlist[current.Measure].Notes[0].Speed = 120;
-                chordlist[current.Measure].Notes[1].Speed = 120;
-                chordlist[current.Measure].Notes[2].Speed = 120;
-                // chordlist[current.Measure].Notes[3].Speed = 120;
-
-            }
-        }
-
-        /// <summary>
         /// WholeToneモード:全音符(初期設定と同じ)
         /// </summary>
         /// <param name="sender"></param>
@@ -253,6 +197,13 @@ namespace EnsembleCommander
         {
             // Alpggioの場合一度WholeNoteに戻す
             SetWholeTone();
+            foreach(var chord in chordlist)
+            {
+                foreach (var note in chord.Notes)
+                {
+                    note.Velocity = 0;
+                }
+            }
         }
 
         /// <summary>
