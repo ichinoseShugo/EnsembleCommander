@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:EnsembleCommander"
         mc:Ignorable="d"
-        Title="MainWindow" Height="520" Width="1280" Loaded="Window_Loaded" Unloaded="Window_Unloaded">
+        Title="MainWindow" Height="520" Width="1120" Loaded="Window_Loaded" Unloaded="Window_Unloaded">
     <StackPanel Orientation="Horizontal">
         <StackPanel Width="300">
             <Label Content="MIDI"/>
@@ -21,7 +21,7 @@
             </StackPanel>
             <Button Name="OnNote" Content="Tap" Click="OnNote_Click"/>
         </StackPanel>
-        <ListBox Name="PivotList" Width="320" SelectionChanged="PivotList_SelectionChanged"/>
+        <ListBox Name="PivotList" Width="160" SelectionChanged="PivotList_SelectionChanged"/>
         <Grid Width="640">
             <Image Name="imageColor" Height="480" Width="640"/>
             <Canvas x:Name="CanvasFaceParts" Height="480" Width="640"/>

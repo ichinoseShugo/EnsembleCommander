@@ -57,7 +57,15 @@ namespace EnsembleCommander
         const int DEPTH_HEIGHT = 480;
         const int DEPTH_FPS = 30;
 
-        //イベントハンドラ-------------------------------------------------------------------
+        //Mainイベント-------------------------------------------------------------------
+
+        /// <summary>
+        /// 一番最初に呼び出される部分
+        /// </summary>
+        public MainWindow()
+        {
+            InitializeComponent();
+        }
 
         /// <summary>
         /// Windowのロード時に初期化及び周期処理の登録を行う
@@ -66,11 +74,15 @@ namespace EnsembleCommander
         /// <param name="e"></param>
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
-            //InitializeRealSense();
             InitializeMIDI(0);
             InitializeView();
-            //WPFのオブジェクトがレンダリングされるタイミング(およそ1秒に50から60)に呼び出される
-            //CompositionTarget.Rendering += CompositionTarget_Rendering;
+            //RealSenseの初期化
+            if (InitializeRealSense())
+            {
+                //初期化に成功したらレンダリングイベントの登録
+                //WPFのオブジェクトがレンダリングされるタイミング(およそ1秒に50から60)に呼び出される
+                CompositionTarget.Rendering += CompositionTarget_Rendering;
+            }
         }
 
         /// <summary>
@@ -82,6 +94,8 @@ namespace EnsembleCommander
         {
             Uninitialize();
         }
+
+        //RealSenseイベント-------------------------------------------------------------------
 
         /// <summary>
         /// フレームごとの更新及び個別のデータ更新処理
@@ -126,8 +140,11 @@ namespace EnsembleCommander
         {
             if (data.name.CompareTo("tap") == 0)
             {
+                SetOnNote();
             }
         }
+
+        //MIDIイベント-------------------------------------------------------------------
 
         /// <summary>
         /// 音源再生ボタンイベント
@@ -213,18 +230,7 @@ namespace EnsembleCommander
         /// <param name="e"></param>
         private void OnNote_Click(object sender, RoutedEventArgs e)
         {
-            //Freeモードでないなら終了
-            if (OnFree.IsChecked == false) return;
-
-            //タップタイミングの1ms後のタイミングに演奏音を書き換え
-            MusicTime current = player.MusicTime; // 現在(Tap時)の演奏カーソルを取得
-            foreach(var note in chordlist[current.Measure].Notes)
-            {
-                note.Tick = tickUnit * current.Measure + current.Tick + 1;
-                note.Velocity = 80;
-                note.Gate = 240;
-                note.Speed = 120;
-            }
+            SetOnNote();
         }
 
         /// <summary>
@@ -234,15 +240,7 @@ namespace EnsembleCommander
         /// <param name="e"></param>
         private void PivotList_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            setRange((int)PivotList.SelectedItem);
-        }
-
-        /// <summary>
-        /// 一番最初に呼び出される部分
-        /// </summary>
-        public MainWindow()
-        {
-            InitializeComponent();
+            SetRange((int)PivotList.SelectedItem);
         }
 
         //RealSenseメソッド-------------------------------------------------------------------
@@ -250,7 +248,7 @@ namespace EnsembleCommander
         /// <summary>
         /// 機能の初期化
         /// </summary>
-        private void InitializeRealSense()
+        private bool InitializeRealSense()
         {
             try
             {
@@ -297,11 +295,13 @@ namespace EnsembleCommander
 
                 // 手の検出の初期化
                 InitializeHandTracking();
+
+                return true;
             }
             catch (Exception ex)
             {
                 MessageBox.Show(ex.Message);
-                Close();
+                return false;
             }
         }
 
@@ -514,7 +514,7 @@ namespace EnsembleCommander
                 String structure = "";
                 byte root = 60;
 
-                getStructure(chordName, out root, out structure);
+                GetStructure(chordName, out root, out structure);
 
                 // newでインスタンスを作成し、変数chordに格納
                 Chord chord = new Chord(tick, root, structure);
@@ -560,7 +560,7 @@ namespace EnsembleCommander
         /// </summary>
         /// <param name="chordName"></param>
         /// <returns></returns>
-        public void getStructure(String chordName, out byte root, out String structure)
+        public void GetStructure(String chordName, out byte root, out String structure)
         {
             //chordNameをmidiナンバーに変換し，rootに格納
             if (chordName.StartsWith("C"))
@@ -633,7 +633,7 @@ namespace EnsembleCommander
         /// <summary>
         /// 各chordlistの各構成音を表示
         /// </summary>
-        public void showAllStructure()
+        public void ShowAllStructure()
         {
             for (int i = 0; i < chordlist.Count; i++)
             {
@@ -649,7 +649,7 @@ namespace EnsembleCommander
         /// <summary>
         /// ユーザ指定したRangeにコードを転回してPivotRangeを移動する
         /// </summary>
-        public void setRange(int Range)
+        public void SetRange(int Range)
         {
             MusicTime current = player.MusicTime; // 現在の演奏カーソルを取得
 
@@ -789,6 +789,31 @@ namespace EnsembleCommander
                     chord.Notes[i].Gate = gate;
                     chord.Notes[i].Tick += gate * i;
                 }
+            }
+        }
+
+        /// <summary>
+        /// 自由なタイミングに和音
+        /// </summary>
+        public void SetOnNote()
+        {
+            //Freeモードでないなら終了
+            /*
+            Dispatcher.Invoke(new Action(() =>
+            {
+                // ここで UI を操作する。
+                if (OnFree.IsChecked == false) return;
+            }));
+            */
+
+            //タップタイミングの1ms後のタイミングに演奏音を書き換え
+            MusicTime current = player.MusicTime; // 現在(Tap時)の演奏カーソルを取得
+            foreach (var note in chordlist[current.Measure].Notes)
+            {
+                note.Tick = tickUnit * current.Measure + current.Tick + 1;
+                note.Velocity = 80;
+                note.Gate = 240;
+                note.Speed = 120;
             }
         }
     }
