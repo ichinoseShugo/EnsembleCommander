@@ -5,13 +5,13 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:EnsembleCommander"
         mc:Ignorable="d"
-        Title="MainWindow" Height="520" Width="1120" Loaded="Window_Loaded" Unloaded="Window_Unloaded">
+        Title="MainWindow" Height="550" Width="1120" Loaded="Window_Loaded" Unloaded="Window_Unloaded">
     <StackPanel Orientation="Horizontal">
-        <StackPanel Width="300">
+        <StackPanel Width="320">
             <Label Content="MIDI"/>
             <StackPanel Orientation="Horizontal">
                 <RadioButton x:Name="OnMidi" Content="MIDI On" Margin="5" Click="OnMidi_Click"/>
-                <RadioButton x:Name="OffMidi" Content="MIDI Off" Margin="5" Click="OffMidi_Click"/>
+                <RadioButton x:Name="OffMidi" IsChecked="true" Content="MIDI Off" Margin="5" Click="OffMidi_Click"/>
             </StackPanel>
             <Label Content="MODE"/>
             <StackPanel Orientation="Horizontal">
@@ -20,11 +20,23 @@
                 <RadioButton x:Name="OnFree" Content="OnFree" Margin="5" Click="OnFree_Click"/>
             </StackPanel>
             <Button Name="OnNote" Content="Tap" Click="OnNote_Click"/>
+            <Label Name="Measure"/>
+            <Label Name="Tick"/>
+            <Label Name="PlayTime"/>
+            <Label Name="Position"/>
+            <Label Name="WholeTime"/>
+            <Grid Name="Score" Height="100" Width="320">
+                <Border BorderThickness="1" BorderBrush="#FF00A1FF" />
+                <Line Name="CurrentLine" StrokeThickness="5" X1="0" Y1="0" X2="0" Y2="100" Stroke="#FF3062E8" />
+            </Grid>
         </StackPanel>
         <ListBox Name="PivotList" Width="160" SelectionChanged="PivotList_SelectionChanged"/>
-        <Grid Width="640">
-            <Image Name="imageColor" Height="480" Width="640"/>
-            <Canvas x:Name="CanvasFaceParts" Height="480" Width="640"/>
-        </Grid>
+        <StackPanel>
+            <Label Name="ConnectCheck" Content="UnConnect"/>
+            <Grid Width="640">
+                <Image Name="imageColor" Height="480" Width="640"/>
+                <Canvas x:Name="CanvasFaceParts" Height="480" Width="640"/>
+            </Grid>
+        </StackPanel>
     </StackPanel>
 </Window>

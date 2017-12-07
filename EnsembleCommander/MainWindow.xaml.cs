@@ -25,17 +25,18 @@ namespace EnsembleCommander
         MidiOutPort port;
         MidiPlayer player;
         MidiFileDomain domain;
-
+        MusicTime currentTime;
+        MidiTrack track;
         /// <summary>
         /// 一小節の時間
         /// </summary>
         public int tickUnit = 240 * 4;
-
         /// <summary>
         /// コード進行の各コードのリスト
         /// </summary>
         List<Chord> chordlist = new List<Chord>();
 
+        public bool IsConnectRealSense = false;
         PXCMSenseManager senseManager;
         /// <summary>
         /// 座標変換オブジェクト
@@ -57,6 +58,7 @@ namespace EnsembleCommander
         const int DEPTH_HEIGHT = 480;
         const int DEPTH_FPS = 30;
 
+
         //Mainイベント-------------------------------------------------------------------
 
         /// <summary>
@@ -77,12 +79,10 @@ namespace EnsembleCommander
             InitializeMIDI(0);
             InitializeView();
             //RealSenseの初期化
-            if (InitializeRealSense())
-            {
-                //初期化に成功したらレンダリングイベントの登録
-                //WPFのオブジェクトがレンダリングされるタイミング(およそ1秒に50から60)に呼び出される
-                CompositionTarget.Rendering += CompositionTarget_Rendering;
-            }
+            IsConnectRealSense = InitializeRealSense();
+            ConnectCheck.Content = IsConnectRealSense;//バインド予定
+            //WPFのオブジェクトがレンダリングされるタイミング(およそ1秒に50から60)に呼び出される
+            CompositionTarget.Rendering += CompositionTarget_Rendering;
         }
 
         /// <summary>
@@ -95,8 +95,6 @@ namespace EnsembleCommander
             Uninitialize();
         }
 
-        //RealSenseイベント-------------------------------------------------------------------
-
         /// <summary>
         /// フレームごとの更新及び個別のデータ更新処理
         /// </summary>
@@ -104,33 +102,11 @@ namespace EnsembleCommander
         /// <param name="e"></param>
         private void CompositionTarget_Rendering(object sender, EventArgs e)
         {
-            try
-            {
-                //フレームを取得する
-                //AcquireFrame()の引数はすべての機能の更新が終るまで待つかどうかを指定
-                //ColorやDepthによって更新間隔が異なるので設定によって値を変更
-                var ret = senseManager.AcquireFrame(true);
-                if (ret < pxcmStatus.PXCM_STATUS_NO_ERROR) return;
-
-                //フレームデータを取得する
-                PXCMCapture.Sample sample = senseManager.QuerySample();
-                if (sample != null)
-                {
-                    //カラー画像の表示
-                    UpdateColorImage(sample.color);
-                }
-
-                UpdateHandFrame();
-
-                //フレームを解放する
-                senseManager.ReleaseFrame();
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show(ex.Message);
-                Close();
-            }
+            if (IsConnectRealSense) UpdateRealSense();
+            if (player.Playing) UpdateMIDI();
         }
+
+        //RealSenseイベント-------------------------------------------------------------------
 
         /// <summary>
         /// ジェスチャーが呼び出された時のイベント
@@ -147,6 +123,23 @@ namespace EnsembleCommander
         //MIDIイベント-------------------------------------------------------------------
 
         /// <summary>
+        /// 各フレームにおけるMIDIの処理
+        /// </summary>
+        private void UpdateMIDI()
+        {
+            Measure.Content = player.MusicTime.Measure;
+            Tick.Content = player.MusicTime.Tick;
+            double pos = ((tickUnit * player.MusicTime.Measure + player.MusicTime.Tick) / ((double)track.TickLength+1000)) * Score.Width;
+
+            CurrentLine.X1 = pos;
+            CurrentLine.X2 = pos;
+
+            WholeTime.Content = track.TickLength;
+            PlayTime.Content = tickUnit * player.MusicTime.Measure + player.MusicTime.Tick;
+            Position.Content = pos;
+        }
+
+        /// <summary>
         /// 音源再生ボタンイベント
         /// </summary>
         /// <param name="sender"></param>
@@ -154,6 +147,7 @@ namespace EnsembleCommander
         private void OnMidi_Click(object sender, RoutedEventArgs e)
         {
             player.Stop();
+            currentTime = player.MusicTime;
             player.Play(domain);
         }
 
@@ -182,7 +176,7 @@ namespace EnsembleCommander
         /// <param name="e"></param>
         private void OffMidi_Click(object sender, RoutedEventArgs e)
         {
-            player.Stop();
+            if(player!=null)player.Stop();
         }
 
         /// <summary>
@@ -300,7 +294,7 @@ namespace EnsembleCommander
             }
             catch (Exception ex)
             {
-                MessageBox.Show(ex.Message);
+                Console.WriteLine(ex.Message);
                 return false;
             }
         }
@@ -342,6 +336,29 @@ namespace EnsembleCommander
             config.SubscribeGesture(OnFiredGesture);
             config.ApplyChanges();
             config.Update();
+        }
+
+        /// <summary>
+        /// RealSesnseの更新
+        /// </summary>
+        private void UpdateRealSense()
+        {
+            //フレームを取得する
+            //AcquireFrame()の引数はすべての機能の更新が終るまで待つかどうかを指定
+            //ColorやDepthによって更新間隔が異なるので設定によって値を変更
+            var ret = senseManager.AcquireFrame(true);
+            if (ret < pxcmStatus.PXCM_STATUS_NO_ERROR) return;
+
+            //フレームデータを取得する
+            PXCMCapture.Sample sample = senseManager.QuerySample();
+            if (sample != null)
+            {
+                //カラー画像の表示
+                UpdateColorImage(sample.color);
+            }
+            UpdateHandFrame();
+            //フレームを解放する
+            senseManager.ReleaseFrame();
         }
 
         /// <summary>
@@ -503,7 +520,7 @@ namespace EnsembleCommander
             // Midiデータの作成
             String[] chordProgress = { "C", "Am", "F", "G", "Em", "F", "G", "C" }; //背景楽曲のコード進行配列
             MidiData midiData = new MidiData();
-            MidiTrack track = new MidiTrack(); //各楽器が見る楽譜
+            track = new MidiTrack(); //各楽器が見る楽譜
             midiData.Tracks.Add(track); //midiDataにtrackを対応付け
 
             int tick = 0;
