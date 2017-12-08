@@ -14,6 +14,7 @@ using NextMidi.Filing.Midi;
 using NextMidi.MidiPort.Output;
 using NextMidi.Time;
 using System.Threading.Tasks;
+using System.Text.RegularExpressions;
 
 namespace EnsembleCommander
 {
@@ -35,6 +36,8 @@ namespace EnsembleCommander
         /// コード進行の各コードのリスト
         /// </summary>
         List<Chord> chordlist = new List<Chord>();
+
+        Regex RootNameP = new Regex("^[ABCDEFG]+[b#]*", RegexOptions.Compiled);
 
         public bool IsConnectRealSense = false;
         PXCMSenseManager senseManager;
@@ -129,7 +132,7 @@ namespace EnsembleCommander
         {
             Measure.Content = player.MusicTime.Measure;
             Tick.Content = player.MusicTime.Tick;
-            double pos = ((tickUnit * player.MusicTime.Measure + player.MusicTime.Tick) / ((double)track.TickLength+1000)) * Score.Width;
+            double pos = ((tickUnit * player.MusicTime.Measure + player.MusicTime.Tick) / ((double)track.TickLength + 1000)) * Score.Width;
 
             CurrentLine.X1 = pos;
             CurrentLine.X2 = pos;
@@ -176,7 +179,7 @@ namespace EnsembleCommander
         /// <param name="e"></param>
         private void OffMidi_Click(object sender, RoutedEventArgs e)
         {
-            if(player!=null)player.Stop();
+            if (player != null) player.Stop();
         }
 
         /// <summary>
@@ -208,7 +211,7 @@ namespace EnsembleCommander
         {
             // Alpggioの場合一度WholeNoteに戻す
             SetWholeTone();
-            foreach(var chord in chordlist)
+            foreach (var chord in chordlist)
             {
                 foreach (var note in chord.Notes)
                 {
@@ -518,7 +521,8 @@ namespace EnsembleCommander
             chordlist.Clear();
 
             // Midiデータの作成
-            String[] chordProgress = { "C", "Am", "F", "G", "Em", "F", "G", "C" }; //背景楽曲のコード進行配列
+            //String[] chordProgress = { "C", "Am", "F", "G", "Em", "F", "G", "C" }; //背景楽曲のコード進行配列
+            String[] chordProgress = { "D", "A", "Bm", "F#m", "G", "D", "G", "A" }; //背景楽曲のコード進行配列 
             MidiData midiData = new MidiData();
             track = new MidiTrack(); //各楽器が見る楽譜
             midiData.Tracks.Add(track); //midiDataにtrackを対応付け
@@ -579,63 +583,75 @@ namespace EnsembleCommander
         /// <returns></returns>
         public void GetStructure(String chordName, out byte root, out String structure)
         {
+            string rootName = "none";
+
+            //chordNameで正規表現と一致する対象を1つ検索
+            Match m = RootNameP.Match(chordName);
+            while (m.Success)
+            {
+                //一致した対象が見つかったときキャプチャした部分文字列を表示
+                rootName = m.Value;
+                //次に一致する対象を検索
+                m = m.NextMatch();
+            }
+            
             //chordNameをmidiナンバーに変換し，rootに格納
-            if (chordName.StartsWith("C"))
+            if (rootName=="C")
             {
                 structure = chordName.Remove(0, 1);
                 root = 60;
             }
-            else if (chordName.StartsWith("C#") || chordName.StartsWith("Db"))
+            else if (rootName=="C#" || rootName=="Db")
             {
                 structure = chordName.Remove(0, 2);
                 root = 61;
             }
-            else if (chordName.StartsWith("D"))
+            else if (rootName=="D")
             {
                 structure = chordName.Remove(0, 1);
                 root = 62;
             }
-            else if (chordName.StartsWith("D#") || chordName.StartsWith("Eb"))
+            else if (rootName=="D#" || rootName=="Eb")
             {
                 structure = chordName.Remove(0, 2);
                 root = 63;
             }
-            else if (chordName.StartsWith("E"))
+            else if (rootName=="E")
             {
                 structure = chordName.Remove(0, 1);
                 root = 64;
             }
-            else if (chordName.StartsWith("F"))
+            else if (rootName=="F")
             {
                 structure = chordName.Remove(0, 1);
                 root = 65;
             }
-            else if (chordName.StartsWith("F#") || chordName.StartsWith("Gb"))
+            else if (rootName=="F#" || rootName=="Gb")
             {
                 structure = chordName.Remove(0, 2);
                 root = 66;
             }
-            else if (chordName.StartsWith("G"))
+            else if (rootName=="G")
             {
                 structure = chordName.Remove(0, 1);
                 root = 55;
             }
-            else if (chordName.StartsWith("G#") || chordName.StartsWith("Ab"))
+            else if (rootName=="G#" || rootName=="Ab")
             {
                 structure = chordName.Remove(0, 2);
                 root = 56;
             }
-            else if (chordName.StartsWith("A"))
+            else if (rootName=="A")
             {
                 structure = chordName.Remove(0, 1);
                 root = 57;
             }
-            else if (chordName.StartsWith("A#") || chordName.StartsWith("Bb"))
+            else if (rootName=="A#" || rootName=="Bb")
             {
                 structure = chordName.Remove(0, 2);
                 root = 58;
             }
-            else if (chordName.StartsWith("B"))
+            else if (rootName=="B")
             {
                 structure = chordName.Remove(0, 1);
                 root = 59;
