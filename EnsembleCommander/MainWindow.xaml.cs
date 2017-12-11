@@ -500,6 +500,30 @@ namespace EnsembleCommander
             depthPoint[0].z = jointData.positionWorld.z * 1000;
             projection.MapDepthToColor(depthPoint, colorPoint);
 
+            for(int i=0; i<5; i++)
+            {
+                Console.WriteLine("a");
+                if ((imageColor.Height / 5) * i <= colorPoint[0].y && colorPoint[0].y < (imageColor.Height / 5) * (i + 1))
+                {
+                    Console.WriteLine(NowRange);
+                    if (16-i != NowRange)
+                    {
+                        Console.WriteLine("c");
+                        SetRange(16-i);
+                        NowRange = 16-i;
+                        /*
+                        PivotList.Dispatcher.BeginInvoke(
+                            
+                            new Action(() =>
+                            {
+                                ((ListBoxItem)PivotList.Items[2]).IsSelected = true;
+                            }
+                            ));
+                            */
+                    }
+                }
+            }
+
             AddEllipse(
                 new Point(colorPoint[0].x, colorPoint[0].y),
                 5,
