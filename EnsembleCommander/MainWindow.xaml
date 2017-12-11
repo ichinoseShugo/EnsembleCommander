@@ -32,7 +32,10 @@
         </StackPanel>
         <ListBox Name="PivotList" Width="160" SelectionChanged="PivotList_SelectionChanged"/>
         <StackPanel>
-            <Label Name="ConnectCheck" Content="UnConnect"/>
+            <StackPanel Orientation="Horizontal">
+                <Label Name="ConnectCheck" Content="UnConnect"/>
+                <Label Name="HandID" Content="none"/>
+            </StackPanel>
             <Grid Width="640">
                 <Image Name="imageColor" Height="480" Width="640"/>
                 <Canvas x:Name="CanvasFaceParts" Height="480" Width="640"/>

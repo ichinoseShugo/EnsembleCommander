@@ -37,6 +37,9 @@ namespace EnsembleCommander
         /// </summary>
         List<Chord> chordlist = new List<Chord>();
 
+        /// <summary>
+        /// 正規表現によるルート音(A,C#,Dbなど)のパターン
+        /// </summary>
         Regex RootNameP = new Regex("^[ABCDEFG]+[b#]*", RegexOptions.Compiled);
 
         public bool IsConnectRealSense = false;
@@ -61,6 +64,16 @@ namespace EnsembleCommander
         const int DEPTH_HEIGHT = 480;
         const int DEPTH_FPS = 30;
 
+        Color[] color = new Color[]{Colors.Red,
+                                    Colors.OrangeRed,
+                                    Colors.Orange,
+                                    Colors.Yellow,
+                                    Colors.YellowGreen,
+                                    Colors.Green,
+                                    Colors.LightBlue,
+                                    Colors.Blue,
+                                    Colors.Navy,
+                                    Colors.Purple };
 
         //Mainイベント-------------------------------------------------------------------
 
@@ -439,12 +452,25 @@ namespace EnsembleCommander
                     depthPoint[0].z = jointData.positionWorld.z * 1000;
                     projection.MapDepthToColor(depthPoint, colorPoint);
 
-                    AddEllipse(CanvasFaceParts,
+                    AddEllipse(
                         new Point(colorPoint[0].x, colorPoint[0].y),
-                        5, Brushes.Green);
+                        5,
+                        Brushes.White,
+                        1);
                 }
 
-
+                for (int k = 0; k < 5; k++)
+                {
+                    SolidColorBrush myBrush = new SolidColorBrush(color[k]);
+                    myBrush.Opacity = 0.25;
+                    AddRectangle(
+                        imageColor.Height / 5 * k,
+                        imageColor.Height / 5,
+                        imageColor.Width,
+                        Brushes.Black,
+                        1.0d,
+                        myBrush);
+                }
             }
         }
 
@@ -456,7 +482,7 @@ namespace EnsembleCommander
         /// <param name="radius"></param>
         /// <param name="color"></param>
         /// <param name="thickness"></param>
-        void AddEllipse(Canvas canvas, Point point, int radius, Brush color, int thickness = 1)
+        private void AddEllipse(Point point, int radius, Brush color, int thickness)
         {
             var ellipse = new Ellipse()
             {
@@ -470,13 +496,39 @@ namespace EnsembleCommander
             }
             else
             {
-                ellipse.Stroke = color;
+                ellipse.Stroke = Brushes.Black;
                 ellipse.StrokeThickness = thickness;
+                ellipse.Fill = color;
             }
 
             Canvas.SetLeft(ellipse, point.X);
             Canvas.SetTop(ellipse, point.Y);
-            canvas.Children.Add(ellipse);
+            CanvasFaceParts.Children.Add(ellipse);
+        }
+
+        /// <summary>
+        /// 四角生成オブジェクト
+        /// </summary>
+        /// <param name="x"></param>
+        /// <param name="y"></param>
+        /// <param name="width"></param>
+        /// <param name="height"></param>
+        /// <param name="stroke"></param>
+        /// <param name="thickness"></param>
+        /// <param name="fill"></param>
+        /// <returns></returns>
+        private void AddRectangle(double y, double height, double width, Brush stroke, double thickness, Brush fill)
+        {
+            Rectangle rect = new Rectangle
+            {
+                Width = width,
+                Height = height,
+                Stroke = stroke,
+                StrokeThickness = thickness,
+                Fill = fill
+            };
+            Canvas.SetTop(rect, y);
+            CanvasFaceParts.Children.Add(rect);
         }
 
         /// <summary>
@@ -583,10 +635,12 @@ namespace EnsembleCommander
         /// <returns></returns>
         public void GetStructure(String chordName, out byte root, out String structure)
         {
+            //ルート音の初期化
             string rootName = "none";
 
             //chordNameで正規表現と一致する対象を1つ検索
             Match m = RootNameP.Match(chordName);
+            //パターンがマッチする限り繰り返す
             while (m.Success)
             {
                 //一致した対象が見つかったときキャプチャした部分文字列を表示
