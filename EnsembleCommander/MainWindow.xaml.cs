@@ -36,6 +36,10 @@ namespace EnsembleCommander
         /// コード進行の各コードのリスト
         /// </summary>
         List<Chord> chordlist = new List<Chord>();
+        /// <summary>
+        /// 現在選択しているRange
+        /// </summary>
+        int NowRange = -1;
 
         /// <summary>
         /// 正規表現によるルート音(A,C#,Dbなど)のパターン
@@ -130,8 +134,23 @@ namespace EnsembleCommander
         /// <param name="data"></param>
         void OnFiredGesture(PXCMHandData.GestureData data)
         {
+            if (data.name.CompareTo("thumb_up") == 0)
+            {
+                Console.WriteLine("thumb_up");
+                if (!player.Playing)
+                {
+                    currentTime = player.MusicTime;
+                    player.Play(domain);
+                }
+            }
+            if (data.name.CompareTo("fist") == 0)
+            {
+                Console.WriteLine("fist");
+                if (player != null || !player.Playing) player.Stop();
+            }
             if (data.name.CompareTo("tap") == 0)
             {
+                Console.WriteLine("tap");
                 SetOnNote();
             }
         }
@@ -174,6 +193,7 @@ namespace EnsembleCommander
         /// <param name="e"></param>
         private void Player_Stopped(object sender, EventArgs e)
         {
+            player.Stop();
             port.Close();
             InitializeMIDI(0);
             OnWholeTone.Dispatcher.BeginInvoke(
@@ -192,7 +212,7 @@ namespace EnsembleCommander
         /// <param name="e"></param>
         private void OffMidi_Click(object sender, RoutedEventArgs e)
         {
-            if (player != null) player.Stop();
+            if (player != null || !player.Playing) player.Stop();
         }
 
         /// <summary>
@@ -251,6 +271,7 @@ namespace EnsembleCommander
         private void PivotList_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             SetRange((int)PivotList.SelectedItem);
+            NowRange = (int)PivotList.SelectedItem;
         }
 
         //RealSenseメソッド-------------------------------------------------------------------
@@ -348,7 +369,9 @@ namespace EnsembleCommander
             // 手の検出の設定
             var config = handAnalyzer.CreateActiveConfiguration();
             config.EnableSegmentationImage(true);
+            config.EnableGesture("thumb_up");
             config.EnableGesture("tap");
+            config.EnableGesture("fist");
             config.SubscribeGesture(OnFiredGesture);
             config.ApplyChanges();
             config.Update();
@@ -372,7 +395,21 @@ namespace EnsembleCommander
                 //カラー画像の表示
                 UpdateColorImage(sample.color);
             }
+            //手のデータを更新
             UpdateHandFrame();
+            //演奏領域の表示
+            for (int k = 0; k < 5; k++)
+            {
+                SolidColorBrush myBrush = new SolidColorBrush(color[k]);
+                myBrush.Opacity = 0.25;
+                AddRectangle(
+                    imageColor.Height / 5 * k,
+                    imageColor.Height / 5,
+                    imageColor.Width,
+                    Brushes.Black,
+                    1.0d,
+                    myBrush);
+            }
             //フレームを解放する
             senseManager.ReleaseFrame();
         }
@@ -433,45 +470,43 @@ namespace EnsembleCommander
                     continue;
                 }
 
+                GetFingerData(hand, PXCMHandData.JointType.JOINT_MIDDLE_TIP);
+
+                /*
                 // 指の関節を列挙する
                 for (int j = 0; j < PXCMHandData.NUMBER_OF_JOINTS; j++)
                 {
-                    // 指のデータを取得する
-                    PXCMHandData.JointData jointData;
-                    sts = hand.QueryTrackedJoint((PXCMHandData.JointType)j, out jointData);
-                    if (sts < pxcmStatus.PXCM_STATUS_NO_ERROR)
-                    {
-                        continue;
-                    }
-
-                    // Depth座標系をカラー座標系に変換する
-                    var depthPoint = new PXCMPoint3DF32[1];
-                    var colorPoint = new PXCMPointF32[1];
-                    depthPoint[0].x = jointData.positionImage.x;
-                    depthPoint[0].y = jointData.positionImage.y;
-                    depthPoint[0].z = jointData.positionWorld.z * 1000;
-                    projection.MapDepthToColor(depthPoint, colorPoint);
-
-                    AddEllipse(
-                        new Point(colorPoint[0].x, colorPoint[0].y),
-                        5,
-                        Brushes.White,
-                        1);
+                    if (!ShowFingerPosition(hand, (PXCMHandData.JointType)i)) continue;
                 }
-
-                for (int k = 0; k < 5; k++)
-                {
-                    SolidColorBrush myBrush = new SolidColorBrush(color[k]);
-                    myBrush.Opacity = 0.25;
-                    AddRectangle(
-                        imageColor.Height / 5 * k,
-                        imageColor.Height / 5,
-                        imageColor.Width,
-                        Brushes.Black,
-                        1.0d,
-                        myBrush);
-                }
+                */
             }
+        }
+
+        private bool GetFingerData(PXCMHandData.IHand hand, PXCMHandData.JointType jointType)
+        {
+            // 指のデータを取得する
+            PXCMHandData.JointData jointData;
+            var sts = hand.QueryTrackedJoint(jointType, out jointData);
+            if (sts < pxcmStatus.PXCM_STATUS_NO_ERROR)
+            {
+                return false;
+            }
+
+            // Depth座標系をカラー座標系に変換する
+            var depthPoint = new PXCMPoint3DF32[1];
+            var colorPoint = new PXCMPointF32[1];
+            depthPoint[0].x = jointData.positionImage.x;
+            depthPoint[0].y = jointData.positionImage.y;
+            depthPoint[0].z = jointData.positionWorld.z * 1000;
+            projection.MapDepthToColor(depthPoint, colorPoint);
+
+            AddEllipse(
+                new Point(colorPoint[0].x, colorPoint[0].y),
+                5,
+                Brushes.White,
+                1);
+
+            return true;
         }
 
         /// <summary>
