@@ -23,30 +23,11 @@ namespace EnsembleCommander
     /// </summary>
     public partial class MainWindow : Window
     {
-        MidiOutPort port;
-        MidiPlayer player;
-        MidiFileDomain domain;
-        MusicTime currentTime;
-        MidiData midiData;
-        MidiTrack track;
-        MidiTrack track2;
-        /// <summary>
-        /// 一小節の時間
-        /// </summary>
-        public int tickUnit = 240 * 4;
-        /// <summary>
-        /// コード進行の各コードのリスト
-        /// </summary>
-        List<Chord> chordlist = new List<Chord>();
+        MIDIManager midiManager;
         /// <summary>
         /// 現在選択しているRange
         /// </summary>
         int NowRange = -1;
-
-        /// <summary>
-        /// 正規表現によるルート音(A,C#,Dbなど)のパターン
-        /// </summary>
-        Regex RootNameP = new Regex("^[ABCDEFG]+[b#]*", RegexOptions.Compiled);
 
         public bool IsConnectRealSense = false;
         PXCMSenseManager senseManager;
@@ -70,7 +51,7 @@ namespace EnsembleCommander
         const int DEPTH_HEIGHT = 480;
         const int DEPTH_FPS = 30;
 
-        Color[] color = new Color[]{Colors.Red,
+        Color[] colors = new Color[]{Colors.Red,
                                     Colors.OrangeRed,
                                     Colors.Orange,
                                     Colors.Yellow,
@@ -98,7 +79,7 @@ namespace EnsembleCommander
         /// <param name="e"></param>
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
-            InitializeMIDI(0);
+            InitializeMIDI();
             InitializeView();
             //RealSenseの初期化
             IsConnectRealSense = InitializeRealSense();
@@ -125,7 +106,7 @@ namespace EnsembleCommander
         private void CompositionTarget_Rendering(object sender, EventArgs e)
         {
             if (IsConnectRealSense) UpdateRealSense();
-            if (player.Playing) UpdateMIDI();
+            //if (player.Playing) UpdateMIDI();
         }
 
         //RealSenseイベント-------------------------------------------------------------------
@@ -139,21 +120,17 @@ namespace EnsembleCommander
             if (data.name.CompareTo("thumb_up") == 0)
             {
                 Console.WriteLine("thumb_up");
-                if (!player.Playing)
-                {
-                    currentTime = player.MusicTime;
-                    player.Play(domain);
-                }
+                midiManager.PlayMIDI();
             }
             if (data.name.CompareTo("fist") == 0)
             {
                 Console.WriteLine("fist");
-                if (player != null || !player.Playing) player.Stop();
+                midiManager.StopMIDI();
             }
             if (data.name.CompareTo("tap") == 0)
             {
                 Console.WriteLine("tap");
-                SetOnNote();
+                //SetOnNote();
             }
         }
 
@@ -164,16 +141,16 @@ namespace EnsembleCommander
         /// </summary>
         private void UpdateMIDI()
         {
-            Measure.Content = player.MusicTime.Measure;
-            Tick.Content = player.MusicTime.Tick;
-            double pos = ((tickUnit * player.MusicTime.Measure + player.MusicTime.Tick) / ((double)track.TickLength + 1000)) * Score.Width;
+            //Measure.Content = player.MusicTime.Measure;
+            //Tick.Content = player.MusicTime.Tick;
+            //double pos = ((tickUnit * player.MusicTime.Measure + player.MusicTime.Tick) / ((double)track.TickLength + 1000)) * Score.Width;
 
-            CurrentLine.X1 = pos;
-            CurrentLine.X2 = pos;
+            //CurrentLine.X1 = pos;
+            //CurrentLine.X2 = pos;
 
-            WholeTime.Content = track.TickLength;
-            PlayTime.Content = tickUnit * player.MusicTime.Measure + player.MusicTime.Tick;
-            Position.Content = pos;
+            //WholeTime.Content = track.TickLength;
+            //PlayTime.Content = tickUnit * player.MusicTime.Measure + player.MusicTime.Tick;
+            //Position.Content = pos;
         }
 
         /// <summary>
@@ -183,9 +160,7 @@ namespace EnsembleCommander
         /// <param name="e"></param>
         private void OnMidi_Click(object sender, RoutedEventArgs e)
         {
-            player.Stop();
-            currentTime = player.MusicTime;
-            player.Play(domain);
+            midiManager.PlayMIDI();
         }
 
         /// <summary>
@@ -195,16 +170,12 @@ namespace EnsembleCommander
         /// <param name="e"></param>
         private void Player_Stopped(object sender, EventArgs e)
         {
-            player.Stop();
-            port.Close();
-            InitializeMIDI(0);
             OnWholeTone.Dispatcher.BeginInvoke(
              new Action(() =>
              {
-                 OnWholeTone.IsChecked = true;
+                 //OnWholeTone.IsChecked = true;
              })
             );
-            player.Play(domain);
         }
 
         /// <summary>
@@ -214,7 +185,7 @@ namespace EnsembleCommander
         /// <param name="e"></param>
         private void OffMidi_Click(object sender, RoutedEventArgs e)
         {
-            if (player != null || !player.Playing) player.Stop();
+            midiManager.StopMIDI();
         }
 
         /// <summary>
@@ -224,7 +195,7 @@ namespace EnsembleCommander
         /// <param name="e"></param>
         private void OnWholeTone_Click(object sender, RoutedEventArgs e)
         {
-            SetWholeTone();
+            midiManager.ExchangeTrack("WHOLETONE");
         }
 
         /// <summary>
@@ -234,7 +205,7 @@ namespace EnsembleCommander
         /// <param name="e"></param>
         private void OnArpeggio_Click(object sender, RoutedEventArgs e)
         {
-            foreach (var chord in chordlist) chord.SetArppegioMode();
+            midiManager.ExchangeTrack("ARPEGGIO");
         }
 
         /// <summary>
@@ -244,18 +215,7 @@ namespace EnsembleCommander
         /// <param name="e"></param>
         private void OnFree_Click(object sender, RoutedEventArgs e)
         {
-            // Alpggioの場合一度WholeNoteに戻す
-            SetWholeTone();
-            foreach (var chord in chordlist)
-            {
-                foreach (var notes in chord.NotesList)
-                {
-                    foreach (var note in notes)
-                    {
-                        note.Velocity = 0;
-                    }
-                }
-            }
+            midiManager.ExchangeTrack("Free");
         }
 
         /// <summary>
@@ -265,7 +225,7 @@ namespace EnsembleCommander
         /// <param name="e"></param>
         private void OnNote_Click(object sender, RoutedEventArgs e)
         {
-            SetOnNote();
+            //SetOnNote();
         }
 
         /// <summary>
@@ -405,7 +365,7 @@ namespace EnsembleCommander
             //演奏領域の表示
             for (int k = 0; k < 5; k++)
             {
-                SolidColorBrush myBrush = new SolidColorBrush(color[k]);
+                SolidColorBrush myBrush = new SolidColorBrush(colors[k]);
                 myBrush.Opacity = 0.25;
                 AddRectangle(
                     imageColor.Height / 5 * k,
@@ -631,56 +591,10 @@ namespace EnsembleCommander
         /// MIDIの初期化
         /// </summary>
         /// <param name="portnum"></param>
-        void InitializeMIDI(int portnum)
+        void InitializeMIDI()
         {
-            //コードリストの初期化
-            chordlist.Clear();
-
-            // Midiデータの作成
-            //String[] chordProgress = { "C", "Am", "F", "G", "Em", "F", "G", "C" }; //背景楽曲のコード進行配列
-            String[] chordProgress = { "D", "A", "Bm", "F#m", "G", "D", "G", "A" }; //背景楽曲のコード進行配列 
-            midiData = new MidiData();
-            track = new MidiTrack(); //各楽器が見る楽譜
-            track2 = new MidiTrack();
-            midiData.Tracks.Add(track); //midiDataにtrackを対応付け
-            
-            int ChordTickFromStart = 0;
-            //コード進行配列(chordProgress)から根音(root)を決定する
-            foreach (String chordName in chordProgress)
-            {
-                //コードの根音を取得
-                String structure = "";
-                byte root = 60;
-
-                GetStructure(chordName, out root, out structure);
-
-                // newでインスタンスを作成し、変数chordに格納
-                Chord chord = new Chord(ChordTickFromStart, root, structure, track);
-                track2.Insert(chord.Base);
-                track.Insert(chord.Base);//ベース音の登録
-                foreach (var notes in chord.NotesList)
-                    foreach (var note in notes) track.Insert(note);
-
-                chordlist.Add(chord); // chordをリストchordlistに追加
-                ChordTickFromStart += chord.Gate; //次のchordの開始タイミングにする
-            }
-            //showAllStructure();
-
-            port = new MidiOutPort(portnum);
-            try
-            {
-                port.Open();
-            }
-            catch
-            {
-                Console.WriteLine("no such port exists");
-                return;
-            }
-
-            // テンポマップを作成
-            domain = new MidiFileDomain(midiData);
-            player = new MidiPlayer(port);
-            player.Stopped += Player_Stopped;
+            midiManager = new MIDIManager(0);
+            midiManager.player.Stopped += Player_Stopped;
         }
 
         /// <summary>
@@ -693,269 +607,23 @@ namespace EnsembleCommander
             PivotList.ItemsSource = null;
             PivotList.ItemsSource = Ranges;
         }
-
-        /// <summary>
-        /// コードネームからNoteナンバー(byte型)と構造(string型)を決定
-        /// </summary>
-        /// <param name="chordName"></param>
-        /// <returns></returns>
-        public void GetStructure(String chordName, out byte root, out String structure)
-        {
-            //ルート音の初期化
-            string rootName = "none";
-
-            //chordNameで正規表現と一致する対象を1つ検索
-            Match m = RootNameP.Match(chordName);
-            //パターンがマッチする限り繰り返す
-            while (m.Success)
-            {
-                //一致した対象が見つかったときキャプチャした部分文字列を表示
-                rootName = m.Value;
-                //次に一致する対象を検索
-                m = m.NextMatch();
-            }
-            
-            //chordNameをmidiナンバーに変換し，rootに格納
-            if (rootName=="C")
-            {
-                structure = chordName.Remove(0, 1);
-                root = 60;
-            }
-            else if (rootName=="C#" || rootName=="Db")
-            {
-                structure = chordName.Remove(0, 2);
-                root = 61;
-            }
-            else if (rootName=="D")
-            {
-                structure = chordName.Remove(0, 1);
-                root = 62;
-            }
-            else if (rootName=="D#" || rootName=="Eb")
-            {
-                structure = chordName.Remove(0, 2);
-                root = 63;
-            }
-            else if (rootName=="E")
-            {
-                structure = chordName.Remove(0, 1);
-                root = 64;
-            }
-            else if (rootName=="F")
-            {
-                structure = chordName.Remove(0, 1);
-                root = 65;
-            }
-            else if (rootName=="F#" || rootName=="Gb")
-            {
-                structure = chordName.Remove(0, 2);
-                root = 66;
-            }
-            else if (rootName=="G")
-            {
-                structure = chordName.Remove(0, 1);
-                root = 55;
-            }
-            else if (rootName=="G#" || rootName=="Ab")
-            {
-                structure = chordName.Remove(0, 2);
-                root = 56;
-            }
-            else if (rootName=="A")
-            {
-                structure = chordName.Remove(0, 1);
-                root = 57;
-            }
-            else if (rootName=="A#" || rootName=="Bb")
-            {
-                structure = chordName.Remove(0, 2);
-                root = 58;
-            }
-            else if (rootName=="B")
-            {
-                structure = chordName.Remove(0, 1);
-                root = 59;
-            }
-            else
-            {
-                structure = "none";
-                root = 128;
-            }
-        }
-
-        /// <summary>
-        /// 各chordlistの各構成音を表示
-        /// </summary>
-        public void ShowAllStructure()
-        {
-            /*
-            for (int i = 0; i < chordlist.Count; i++)
-            {
-                Console.WriteLine("chordlist[" + i + "]");
-                Console.WriteLine("Note[0]=" + chordlist[i].Notes[0].Note);
-                Console.WriteLine("Note[1]=" + chordlist[i].Notes[1].Note);
-                Console.WriteLine("Note[2]=" + chordlist[i].Notes[2].Note);
-                Console.WriteLine("Pivot=" + chordlist[i].Pivot);
-                Console.WriteLine("PivotRange=" + chordlist[i].PivotRange + "\n");
-            }
-            */
-        }
-
+        
         /// <summary>
         /// ユーザ指定したRangeにコードを転回してPivotRangeを移動する
         /// </summary>
         public void SetRange(int Range)
         {
-            MusicTime current = player.MusicTime; // 現在の演奏カーソルを取得
+            //MusicTime current = player.MusicTime; // 現在の演奏カーソルを取得
 
             // 次の小節のコードのPivotRangeとユーザが指定したRangeとの差分だけ転回
             // 次の小節からそれ以降の小節まで
+            /*
             for (int i = current.Measure; i < chordlist.Count; i++)
             {
                 //ユーザが指定したRangeとの差分だけ転回
                 Turn(Range - chordlist[i].PivotRange, i);
             }
-        }
-
-        /// <summary>
-        /// 転回メソッド : i小節目のコードをk回だけ転回する
-        /// </summary>
-        /// <param name="k"></param>
-        /// <param name="i"></param>
-        private void Turn(int k, int i)
-        {/*
-            if (k > 0) // +k転回
-            {
-                for (int j = 0; j < k; j++)
-                {
-                    // Notes[0]からNotes[3]のNoteうち、要素のnoteナンバーが一番小さいNotes[].Noteを一オクターブ上げる
-                    int min = chordlist[i].Notes[0].Note;
-                    int minIndex = 0;
-                    if (min > chordlist[i].Notes[1].Note)
-                    {
-                        min = chordlist[i].Notes[1].Note;
-                        minIndex = 1;
-                    }
-                    if (min > chordlist[i].Notes[2].Note)
-                    {
-                        min = chordlist[i].Notes[2].Note;
-                        minIndex = 2;
-                    }
-                    // int MinIndex = Array.IndexOf(chordlist[i].Notes, max);
-                    chordlist[i].Notes[minIndex].Note += 12;
-                }
-
-                // Pivotの更新
-                chordlist[i].Pivot = (chordlist[i].Notes[0].Note + chordlist[i].Notes[1].Note + chordlist[i].Notes[2].Note) / 3;
-
-                //PivotRangeの更新
-                for (int rangeIndex = 0; rangeIndex < 31; rangeIndex++)
-                {
-                    if (rangeIndex * 4 <= chordlist[i].Pivot && chordlist[i].Pivot < (rangeIndex + 1) * 4)
-                    {
-                        chordlist[i].PivotRange = rangeIndex;
-                        break;
-                    }
-                }
-
-            }
-
-            if (k < 0) // -k転回
-            {
-                k = k * (-1);
-                for (int j = 0; j < k; j++)
-                {
-                    // Notes[0]からNotes[3]のNoteうち、要素の値が一番小さいNotes[].Noteを一オクターブ上げる
-                    int max = chordlist[i].Notes[0].Note;
-                    int maxIndex = 0;
-                    if (max < chordlist[i].Notes[1].Note)
-                    {
-                        max = chordlist[i].Notes[1].Note;
-                        maxIndex = 1;
-                    }
-                    if (max < chordlist[i].Notes[2].Note)
-                    {
-                        max = chordlist[i].Notes[2].Note;
-                        maxIndex = 2;
-                    }
-                    // int MinIndex = Array.IndexOf(chordlist[i].Notes, max);
-                    chordlist[i].Notes[maxIndex].Note -= 12;
-                }
-
-                // Pivot, PivotRangeの更新
-                chordlist[i].Pivot = (chordlist[i].Notes[0].Note + chordlist[i].Notes[1].Note + chordlist[i].Notes[2].Note) / 3;
-
-                //PivotRangeの更新
-                for (int rangeIndex = 0; rangeIndex < 31; rangeIndex++)
-                {
-                    if (rangeIndex * 4 <= chordlist[i].Pivot && chordlist[i].Pivot < (rangeIndex + 1) * 4)
-                    {
-                        chordlist[i].PivotRange = rangeIndex;
-                        break;
-                    }
-                }
-            }
             */
-        }
-
-        /// <summary>
-        /// コード進行を全音表記に
-        /// </summary>
-        public void SetWholeTone()
-        {
-            foreach (var chord in chordlist)
-            {
-                /*
-                //コードの和音の数とノートリストの数が合わなければ
-                //(現時点ではアルペジオによって三和音でも4つのノートが鳴る場合)
-                if (chord.NoteCount < chord.Notes.Count)
-                {
-                    //トラックから音を削除
-                    domain.MidiData.Tracks[0].Remove(chord.Notes[chord.Notes.Count - 1]);
-                    //リストから音を削除
-                    chord.Notes.Remove(chord.Notes[chord.Notes.Count - 1]);
-                }
-                foreach (var note in chord.Notes)
-                {
-                    note.Gate = tickUnit; //音の長さを一小節の時間に
-                    note.Tick = chord.TickFromStart; //TickのタイミングをchordのTickと合わせる
-                }
-                */
-            }
-        }
-
-        /// <summary>
-        /// 自由なタイミングに和音
-        /// </summary>
-        public void SetOnNote()
-        {
-            bool ischeck = false;
-            Dispatcher.Invoke(new Action(() =>
-            {
-                // ここで UI を操作する。
-                if (OnFree.IsChecked == true) ischeck = true; ;
-            }));
-            if (!ischeck) return;
-
-            //タップタイミングの1ms後のタイミングに演奏音を書き換え
-            MusicTime current = player.MusicTime; // 現在(Tap時)の演奏カーソルを取得
-
-            foreach (var notes in chordlist[current.Measure].NotesList)
-            {
-                foreach (var note in notes)
-                {
-                    note.Tick = tickUnit * current.Measure + current.Tick + 1;
-                    note.Velocity = 80;
-                    note.Gate = 240;
-                    note.Speed = 120;
-                }
-            }
-        }
-        
-        private void Button_Click(object sender, RoutedEventArgs e)
-        {
-            midiData.Tracks.Add(track2);
-            midiData.Tracks.RemoveAt(0);
         }
     }
 }
