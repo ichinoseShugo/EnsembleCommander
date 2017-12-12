@@ -54,53 +54,69 @@
     <Prefer32Bit>true</Prefer32Bit>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="avenue.core">
-      <HintPath>..\..\..\..\..\Documents\dll\nextmidi\Package\avenue.core.dll</HintPath>
+    <Reference Include="avenue.core, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>bin\x64\Debug\avenue.core.dll</HintPath>
     </Reference>
-    <Reference Include="avenue.filing">
-      <HintPath>..\..\..\..\..\Documents\dll\nextmidi\Package\avenue.filing.dll</HintPath>
+    <Reference Include="avenue.filing, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>bin\x64\Debug\avenue.filing.dll</HintPath>
     </Reference>
-    <Reference Include="libpxcclr.cs">
-      <HintPath>..\..\..\..\..\..\..\Program Files (x86)\Intel\RSSDK\bin\x64\libpxcclr.cs.dll</HintPath>
+    <Reference Include="libpxcclr.cs, Version=10.0.26.396, Culture=neutral, PublicKeyToken=ca106b2214526f83, processorArchitecture=AMD64">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>bin\x64\Debug\libpxcclr.cs.dll</HintPath>
     </Reference>
-    <Reference Include="nextmidi.data">
-      <HintPath>..\..\..\..\..\Documents\dll\nextmidi\Package\nextmidi.data.dll</HintPath>
+    <Reference Include="nextmidi.data, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>bin\x64\Debug\nextmidi.data.dll</HintPath>
     </Reference>
-    <Reference Include="nextmidi.dataelement">
-      <HintPath>..\..\..\..\..\Documents\dll\nextmidi\Package\nextmidi.dataelement.dll</HintPath>
+    <Reference Include="nextmidi.dataelement, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>bin\x64\Debug\nextmidi.dataelement.dll</HintPath>
     </Reference>
-    <Reference Include="nextmidi.dataelement.status">
-      <HintPath>..\..\..\..\..\Documents\dll\nextmidi\Package\nextmidi.dataelement.status.dll</HintPath>
+    <Reference Include="nextmidi.dataelement.status, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>bin\x64\Debug\nextmidi.dataelement.status.dll</HintPath>
     </Reference>
-    <Reference Include="nextmidi.filing.midi">
-      <HintPath>..\..\..\..\..\Documents\dll\nextmidi\Package\nextmidi.filing.midi.dll</HintPath>
+    <Reference Include="nextmidi.filing.midi, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>bin\x64\Debug\nextmidi.filing.midi.dll</HintPath>
     </Reference>
-    <Reference Include="nextmidi.filing.midi.chunk">
-      <HintPath>..\..\..\..\..\Documents\dll\nextmidi\Package\nextmidi.filing.midi.chunk.dll</HintPath>
+    <Reference Include="nextmidi.filing.midi.chunk, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>bin\x64\Debug\nextmidi.filing.midi.chunk.dll</HintPath>
     </Reference>
-    <Reference Include="nextmidi.filing.midi.midifile">
-      <HintPath>..\..\..\..\..\Documents\dll\nextmidi\Package\nextmidi.filing.midi.midifile.dll</HintPath>
+    <Reference Include="nextmidi.filing.midi.midifile, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>bin\x64\Debug\nextmidi.filing.midi.midifile.dll</HintPath>
     </Reference>
-    <Reference Include="nextmidi.midiport.bridge">
-      <HintPath>..\..\..\..\..\Documents\dll\nextmidi\Package\nextmidi.midiport.bridge.dll</HintPath>
+    <Reference Include="nextmidi.midiport.bridge, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>bin\x64\Debug\nextmidi.midiport.bridge.dll</HintPath>
     </Reference>
-    <Reference Include="nextmidi.midiport.core">
-      <HintPath>..\..\..\..\..\Documents\dll\nextmidi\Package\nextmidi.midiport.core.dll</HintPath>
+    <Reference Include="nextmidi.midiport.core, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>bin\x64\Debug\nextmidi.midiport.core.dll</HintPath>
     </Reference>
-    <Reference Include="nextmidi.midiport.input">
-      <HintPath>..\..\..\..\..\Documents\dll\nextmidi\Package\nextmidi.midiport.input.dll</HintPath>
+    <Reference Include="nextmidi.midiport.input, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>bin\x64\Debug\nextmidi.midiport.input.dll</HintPath>
     </Reference>
-    <Reference Include="nextmidi.midiport.input.core">
-      <HintPath>..\..\..\..\..\Documents\dll\nextmidi\Package\nextmidi.midiport.input.core.dll</HintPath>
+    <Reference Include="nextmidi.midiport.input.core, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>bin\x64\Debug\nextmidi.midiport.input.core.dll</HintPath>
     </Reference>
-    <Reference Include="nextmidi.midiport.output">
-      <HintPath>..\..\..\..\..\Documents\dll\nextmidi\Package\nextmidi.midiport.output.dll</HintPath>
+    <Reference Include="nextmidi.midiport.output, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>bin\x64\Debug\nextmidi.midiport.output.dll</HintPath>
     </Reference>
-    <Reference Include="nextmidi.midiport.output.core">
-      <HintPath>..\..\..\..\..\Documents\dll\nextmidi\Package\nextmidi.midiport.output.core.dll</HintPath>
+    <Reference Include="nextmidi.midiport.output.core, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>bin\x64\Debug\nextmidi.midiport.output.core.dll</HintPath>
     </Reference>
-    <Reference Include="nextmidi.time">
-      <HintPath>..\..\..\..\..\Documents\dll\nextmidi\Package\nextmidi.time.dll</HintPath>
+    <Reference Include="nextmidi.time, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>bin\x64\Debug\nextmidi.time.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Data" />

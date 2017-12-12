@@ -27,7 +27,9 @@ namespace EnsembleCommander
         MidiPlayer player;
         MidiFileDomain domain;
         MusicTime currentTime;
+        MidiData midiData;
         MidiTrack track;
+        MidiTrack track2;
         /// <summary>
         /// 一小節の時間
         /// </summary>
@@ -232,7 +234,7 @@ namespace EnsembleCommander
         /// <param name="e"></param>
         private void OnArpeggio_Click(object sender, RoutedEventArgs e)
         {
-            SetArpeggio();
+            foreach (var chord in chordlist) chord.SetArppegioMode();
         }
 
         /// <summary>
@@ -246,9 +248,12 @@ namespace EnsembleCommander
             SetWholeTone();
             foreach (var chord in chordlist)
             {
-                foreach (var note in chord.Notes)
+                foreach (var notes in chord.NotesList)
                 {
-                    note.Velocity = 0;
+                    foreach (var note in notes)
+                    {
+                        note.Velocity = 0;
+                    }
                 }
             }
         }
@@ -634,11 +639,12 @@ namespace EnsembleCommander
             // Midiデータの作成
             //String[] chordProgress = { "C", "Am", "F", "G", "Em", "F", "G", "C" }; //背景楽曲のコード進行配列
             String[] chordProgress = { "D", "A", "Bm", "F#m", "G", "D", "G", "A" }; //背景楽曲のコード進行配列 
-            MidiData midiData = new MidiData();
+            midiData = new MidiData();
             track = new MidiTrack(); //各楽器が見る楽譜
+            track2 = new MidiTrack();
             midiData.Tracks.Add(track); //midiDataにtrackを対応付け
-
-            int tick = 0;
+            
+            int ChordTickFromStart = 0;
             //コード進行配列(chordProgress)から根音(root)を決定する
             foreach (String chordName in chordProgress)
             {
@@ -649,13 +655,14 @@ namespace EnsembleCommander
                 GetStructure(chordName, out root, out structure);
 
                 // newでインスタンスを作成し、変数chordに格納
-                Chord chord = new Chord(tick, root, structure);
-
-                track.Insert(chord.Base);//低い根音
-                foreach (var note in chord.Notes) track.Insert(note);
+                Chord chord = new Chord(ChordTickFromStart, root, structure, track);
+                track2.Insert(chord.Base);
+                track.Insert(chord.Base);//ベース音の登録
+                foreach (var notes in chord.NotesList)
+                    foreach (var note in notes) track.Insert(note);
 
                 chordlist.Add(chord); // chordをリストchordlistに追加
-                tick += tickUnit; //一小節進む
+                ChordTickFromStart += chord.Gate; //次のchordの開始タイミングにする
             }
             //showAllStructure();
 
@@ -781,6 +788,7 @@ namespace EnsembleCommander
         /// </summary>
         public void ShowAllStructure()
         {
+            /*
             for (int i = 0; i < chordlist.Count; i++)
             {
                 Console.WriteLine("chordlist[" + i + "]");
@@ -790,6 +798,7 @@ namespace EnsembleCommander
                 Console.WriteLine("Pivot=" + chordlist[i].Pivot);
                 Console.WriteLine("PivotRange=" + chordlist[i].PivotRange + "\n");
             }
+            */
         }
 
         /// <summary>
@@ -814,7 +823,7 @@ namespace EnsembleCommander
         /// <param name="k"></param>
         /// <param name="i"></param>
         private void Turn(int k, int i)
-        {
+        {/*
             if (k > 0) // +k転回
             {
                 for (int j = 0; j < k; j++)
@@ -886,7 +895,7 @@ namespace EnsembleCommander
                     }
                 }
             }
-
+            */
         }
 
         /// <summary>
@@ -896,6 +905,7 @@ namespace EnsembleCommander
         {
             foreach (var chord in chordlist)
             {
+                /*
                 //コードの和音の数とノートリストの数が合わなければ
                 //(現時点ではアルペジオによって三和音でも4つのノートが鳴る場合)
                 if (chord.NoteCount < chord.Notes.Count)
@@ -910,31 +920,7 @@ namespace EnsembleCommander
                     note.Gate = tickUnit; //音の長さを一小節の時間に
                     note.Tick = chord.TickFromStart; //TickのタイミングをchordのTickと合わせる
                 }
-            }
-        }
-
-        /// <summary>
-        /// コード進行をアルペジオに
-        /// </summary>
-        public void SetArpeggio()
-        {
-            foreach (var chord in chordlist)
-            {
-                //三和音なら4拍目に最初の音を追加する
-                if (chord.Notes.Count != 4)
-                {
-                    //リストに最初の音を追加
-                    chord.Notes.Add((NoteEvent)chord.Notes[0].Clone());
-                    //トラックに追加の音を挿入
-                    domain.MidiData.Tracks[0].Insert(chord.Notes[chord.Notes.Count - 1]);
-                }
-                //ノートをアルペジオに
-                for (int i = 0; i < chord.Notes.Count; i++)
-                {
-                    int gate = chord.Notes[i].Gate / 4;
-                    chord.Notes[i].Gate = gate;
-                    chord.Notes[i].Tick += gate * i;
-                }
+                */
             }
         }
 
@@ -943,24 +929,33 @@ namespace EnsembleCommander
         /// </summary>
         public void SetOnNote()
         {
-            //Freeモードでないなら終了
-            /*
+            bool ischeck = false;
             Dispatcher.Invoke(new Action(() =>
             {
                 // ここで UI を操作する。
-                if (OnFree.IsChecked == false) return;
+                if (OnFree.IsChecked == true) ischeck = true; ;
             }));
-            */
+            if (!ischeck) return;
 
             //タップタイミングの1ms後のタイミングに演奏音を書き換え
             MusicTime current = player.MusicTime; // 現在(Tap時)の演奏カーソルを取得
-            foreach (var note in chordlist[current.Measure].Notes)
+
+            foreach (var notes in chordlist[current.Measure].NotesList)
             {
-                note.Tick = tickUnit * current.Measure + current.Tick + 1;
-                note.Velocity = 80;
-                note.Gate = 240;
-                note.Speed = 120;
+                foreach (var note in notes)
+                {
+                    note.Tick = tickUnit * current.Measure + current.Tick + 1;
+                    note.Velocity = 80;
+                    note.Gate = 240;
+                    note.Speed = 120;
+                }
             }
+        }
+        
+        private void Button_Click(object sender, RoutedEventArgs e)
+        {
+            midiData.Tracks.Add(track2);
+            midiData.Tracks.RemoveAt(0);
         }
     }
 }
