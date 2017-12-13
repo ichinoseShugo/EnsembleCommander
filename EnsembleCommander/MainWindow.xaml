@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:EnsembleCommander"
         mc:Ignorable="d"
-        Title="MainWindow" Height="550" Width="1120" Loaded="Window_Loaded" Unloaded="Window_Unloaded">
+        Title="MainWindow" Height="600" Width="1450" Loaded="Window_Loaded" Unloaded="Window_Unloaded">
     <StackPanel Orientation="Horizontal">
         <StackPanel Width="320">
             <Label Content="MIDI"/>
@@ -15,21 +15,16 @@
             </StackPanel>
             <Label Content="MODE"/>
             <StackPanel Orientation="Horizontal">
-                <RadioButton x:Name="OnWholeTone" IsChecked="True" Content="OnWholeTone" Margin="5" Click="OnWholeTone_Click"/>
-                <RadioButton x:Name="OnArpeggio" Content="OnArpeggio" Margin="5" Click="OnArpeggio_Click"/>
-                <RadioButton x:Name="OnFree" Content="OnFree" Margin="5" Click="OnFree_Click"/>
+                <RadioButton x:Name="OnWholeTone" IsChecked="True" Content="Whole" Margin="5" Click="OnWholeTone_Click"/>
+                <RadioButton x:Name="OnQuarterTone" Content="Quarter" Margin="5" Click="OnQuarterTone_Click"/>
+                <RadioButton x:Name="OnArpeggio" Content="Arpeggio" Margin="5" Click="OnArpeggio_Click"/>
+                <RadioButton x:Name="OnFree" Content="Free" Margin="5" Click="OnFree_Click"/>
             </StackPanel>
             <Button Name="OnNote" Content="Tap" Click="OnNote_Click"/>
-            <Label Name="Measure"/>
-            <Label Name="Tick"/>
-            <Label Name="PlayTime"/>
-            <Label Name="Position"/>
-            <Label Name="WholeTime"/>
             <Grid Name="Score" Height="100" Width="320">
                 <Border BorderThickness="1" BorderBrush="#FF00A1FF" />
                 <Line Name="CurrentLine" StrokeThickness="5" X1="0" Y1="0" X2="0" Y2="100" Stroke="#FF3062E8" />
             </Grid>
-            <Button Content="Button" Click="Button_Click"/>
         </StackPanel>
         <ListBox Name="PivotList" Width="160" SelectionChanged="PivotList_SelectionChanged"/>
         <StackPanel>
@@ -38,8 +33,8 @@
                 <Label Name="HandID" Content="none"/>
             </StackPanel>
             <Grid Width="640">
-                <Image Name="imageColor" Height="480" Width="640"/>
-                <Canvas x:Name="CanvasFaceParts" Height="480" Width="640"/>
+                <Image Name="imageColor" Height="540" Width="960"/>
+                <Canvas x:Name="CanvasFaceParts" Height="540" Width="960"/>
             </Grid>
         </StackPanel>
     </StackPanel>

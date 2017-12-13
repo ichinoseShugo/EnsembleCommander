@@ -23,13 +23,28 @@ namespace EnsembleCommander
     /// </summary>
     public partial class MainWindow : Window
     {
-        MIDIManager midiManager;
+        /// <summary>
+        /// Midiデータを扱うインスタンス
+        /// </summary>
+        MidiManager midiManager;
+
+        int NowMode = 0;
+        private const int MODE_WHOLE = 0;
+        private const int MODE_QUARTER = 1;
+        private const int MODE_ARPEGGIO = 2;
+        private const int MODE_FREE = 3;
+
+        /// <summary>
+        /// MIDI再生用オブジェクト
+        /// </summary>
+        public MidiPlayer player;
         /// <summary>
         /// 現在選択しているRange
         /// </summary>
         int NowRange = -1;
 
         public bool IsConnectRealSense = false;
+
         PXCMSenseManager senseManager;
         /// <summary>
         /// 座標変換オブジェクト
@@ -43,8 +58,8 @@ namespace EnsembleCommander
         PXCMHandModule handAnalyzer;
         PXCMHandData handData;
 
-        const int COLOR_WIDTH = 640;
-        const int COLOR_HEIGHT = 480;
+        const int COLOR_WIDTH = 1280;
+        const int COLOR_HEIGHT = 720;
         const int COLOR_FPS = 30;
 
         const int DEPTH_WIDTH = 640;
@@ -106,7 +121,7 @@ namespace EnsembleCommander
         private void CompositionTarget_Rendering(object sender, EventArgs e)
         {
             if (IsConnectRealSense) UpdateRealSense();
-            //if (player.Playing) UpdateMIDI();
+            if (player.Playing) UpdateMIDI();
         }
 
         //RealSenseイベント-------------------------------------------------------------------
@@ -120,38 +135,20 @@ namespace EnsembleCommander
             if (data.name.CompareTo("thumb_up") == 0)
             {
                 Console.WriteLine("thumb_up");
-                midiManager.PlayMIDI();
+                PlayMIDI();
             }
             if (data.name.CompareTo("fist") == 0)
             {
                 Console.WriteLine("fist");
-                midiManager.StopMIDI();
+                StopMIDI();
             }
             if (data.name.CompareTo("tap") == 0)
             {
                 Console.WriteLine("tap");
-                //SetOnNote();
             }
         }
 
         //MIDIイベント-------------------------------------------------------------------
-
-        /// <summary>
-        /// 各フレームにおけるMIDIの処理
-        /// </summary>
-        private void UpdateMIDI()
-        {
-            //Measure.Content = player.MusicTime.Measure;
-            //Tick.Content = player.MusicTime.Tick;
-            //double pos = ((tickUnit * player.MusicTime.Measure + player.MusicTime.Tick) / ((double)track.TickLength + 1000)) * Score.Width;
-
-            //CurrentLine.X1 = pos;
-            //CurrentLine.X2 = pos;
-
-            //WholeTime.Content = track.TickLength;
-            //PlayTime.Content = tickUnit * player.MusicTime.Measure + player.MusicTime.Tick;
-            //Position.Content = pos;
-        }
 
         /// <summary>
         /// 音源再生ボタンイベント
@@ -160,7 +157,7 @@ namespace EnsembleCommander
         /// <param name="e"></param>
         private void OnMidi_Click(object sender, RoutedEventArgs e)
         {
-            midiManager.PlayMIDI();
+            PlayMIDI();
         }
 
         /// <summary>
@@ -170,12 +167,14 @@ namespace EnsembleCommander
         /// <param name="e"></param>
         private void Player_Stopped(object sender, EventArgs e)
         {
-            OnWholeTone.Dispatcher.BeginInvoke(
+            Dispatcher.BeginInvoke(
              new Action(() =>
              {
-                 //OnWholeTone.IsChecked = true;
+                 OffMidi.IsChecked = true;
              })
             );
+            foreach (var chord in midiManager.chordProgList[MODE_ARPEGGIO]) chord.SetNotes(MODE_ARPEGGIO);
+            foreach (var chord in midiManager.chordProgList[MODE_FREE]) chord.SetNotes(MODE_FREE);
         }
 
         /// <summary>
@@ -185,7 +184,7 @@ namespace EnsembleCommander
         /// <param name="e"></param>
         private void OffMidi_Click(object sender, RoutedEventArgs e)
         {
-            midiManager.StopMIDI();
+            StopMIDI();
         }
 
         /// <summary>
@@ -195,7 +194,19 @@ namespace EnsembleCommander
         /// <param name="e"></param>
         private void OnWholeTone_Click(object sender, RoutedEventArgs e)
         {
-            midiManager.ExchangeTrack("WHOLETONE");
+            midiManager.ExchangeTrack(MODE_WHOLE);
+            NowMode = MODE_WHOLE;
+        }
+
+        /// <summary>
+        /// 四分音符モード
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void OnQuarterTone_Click(object sender, RoutedEventArgs e)
+        {
+            midiManager.ExchangeTrack(MODE_QUARTER);
+            NowMode = MODE_QUARTER;
         }
 
         /// <summary>
@@ -205,7 +216,8 @@ namespace EnsembleCommander
         /// <param name="e"></param>
         private void OnArpeggio_Click(object sender, RoutedEventArgs e)
         {
-            midiManager.ExchangeTrack("ARPEGGIO");
+            midiManager.ExchangeTrack(MODE_ARPEGGIO);
+            NowMode = MODE_ARPEGGIO;
         }
 
         /// <summary>
@@ -215,7 +227,8 @@ namespace EnsembleCommander
         /// <param name="e"></param>
         private void OnFree_Click(object sender, RoutedEventArgs e)
         {
-            midiManager.ExchangeTrack("Free");
+            midiManager.ExchangeTrack(MODE_FREE);
+            NowMode = MODE_FREE;
         }
 
         /// <summary>
@@ -225,7 +238,7 @@ namespace EnsembleCommander
         /// <param name="e"></param>
         private void OnNote_Click(object sender, RoutedEventArgs e)
         {
-            //SetOnNote();
+            midiManager.SetOnNote(player.MusicTime);
         }
 
         /// <summary>
@@ -235,7 +248,7 @@ namespace EnsembleCommander
         /// <param name="e"></param>
         private void PivotList_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            SetRange((int)PivotList.SelectedItem);
+            midiManager.SetRange((int)PivotList.SelectedItem, player.MusicTime,NowMode);
             NowRange = (int)PivotList.SelectedItem;
         }
 
@@ -474,7 +487,7 @@ namespace EnsembleCommander
                     if (16-i != NowRange)
                     {
                         Console.WriteLine("c");
-                        SetRange(16-i);
+                        //SetRange(16-i);
                         NowRange = 16-i;
                         /*
                         PivotList.Dispatcher.BeginInvoke(
@@ -593,8 +606,31 @@ namespace EnsembleCommander
         /// <param name="portnum"></param>
         void InitializeMIDI()
         {
-            midiManager = new MIDIManager(0);
-            midiManager.player.Stopped += Player_Stopped;
+            midiManager = new MidiManager();
+            player = new MidiPlayer(midiManager.port);
+            player.Stopped += Player_Stopped;
+        }
+
+        /// <summary>
+        /// 各フレームにおけるMIDIの処理
+        /// </summary>
+        private void UpdateMIDI()
+        {
+            double pos = (MidiManager.TICK_UNIT * player.MusicTime.Measure + player.MusicTime.Tick) 
+                / (double)(MidiManager.TICK_UNIT * midiManager.inputedChord.Length)
+                * Score.Width;
+            CurrentLine.X1 = pos;
+            CurrentLine.X2 = pos;
+        }
+
+        public void PlayMIDI()
+        {
+            player.Play(midiManager.domain);
+        }
+
+        public void StopMIDI()
+        {
+            player.Stop();
         }
 
         /// <summary>
@@ -606,24 +642,6 @@ namespace EnsembleCommander
             for (int i = 0; i < 16; i++) Ranges[i] = 31 - (i + 8);
             PivotList.ItemsSource = null;
             PivotList.ItemsSource = Ranges;
-        }
-        
-        /// <summary>
-        /// ユーザ指定したRangeにコードを転回してPivotRangeを移動する
-        /// </summary>
-        public void SetRange(int Range)
-        {
-            //MusicTime current = player.MusicTime; // 現在の演奏カーソルを取得
-
-            // 次の小節のコードのPivotRangeとユーザが指定したRangeとの差分だけ転回
-            // 次の小節からそれ以降の小節まで
-            /*
-            for (int i = current.Measure; i < chordlist.Count; i++)
-            {
-                //ユーザが指定したRangeとの差分だけ転回
-                Turn(Range - chordlist[i].PivotRange, i);
-            }
-            */
         }
     }
 }

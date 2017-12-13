@@ -12,27 +12,36 @@ namespace EnsembleCommander
 { 
     class Chord
     {
+        private const int MODE_WHOLE = 0;
+        private const int MODE_QUATER = 1;
+        private const int MODE_ARPEGGIO = 2;
+        private const int MODE_FREE = 3;
         /// <summary>
-        /// このコード内で演奏される伴奏音(和音やアルペジオを表す配列)が時系列順に入ったリスト
+        /// 正規表現によるルート音(A,C#,Dbなど)のパターン
         /// </summary>
-        public List<NoteEvent[]> NotesList = new List<NoteEvent[]>();
+        private Regex RootNameP = new Regex("^[ABCDEFG]+[b#]*", RegexOptions.Compiled);
+
         /// <summary>
-        /// 根音から2オクターブ下がった音
+        /// このコードのモード
         /// </summary>
-        public NoteEvent Base;
+        public int Mode;
         /// <summary>
         /// コードの構成音
         /// </summary>
         public NoteEvent[] Elements;
+        /// <summary>
+        /// このコード内で演奏される伴奏音(和音やアルペジオを表す配列)が入ったリスト
+        /// </summary>
+        public List<NoteEvent> NoteList = new List<NoteEvent>();
+        /// <summary>
+        /// 根音から2オクターブ下がった音
+        /// </summary>
+        public NoteEvent Base;
 
         /// <summary>
         /// コード全体の演奏開始地点から数えた演奏開始時間
         /// </summary>
         public int TickFromStart;
-        /// <summary>
-        /// コード全体の小節の頭から数えた演奏開始時間
-        /// </summary>
-        public int TickFromMeasure;
         /// <summary>
         /// コード全体の長さ(最初の伴奏音のオンセットから最後の伴奏音のオフセットまでの長さ)
         /// </summary>
@@ -48,20 +57,23 @@ namespace EnsembleCommander
         /// するとどのコードにおいても各領域につき一意に転回形が当てはまる.
         /// </summary>
         public int PivotRange;
-
         /// <summary>
-        /// 正規表現によるルート音(A,C#,Dbなど)のパターン
+        /// 何回転回したか
         /// </summary>
-        private Regex RootNameP = new Regex("^[ABCDEFG]+[b#]*", RegexOptions.Compiled);
-        
+        public int NumOfTurn=0;
+
+        //-------------------------------------------------------------------------------------------------------
+
         /// <summary>
         /// コンストラクタ
         /// </summary>
         /// <param name="tick"></param>
         /// <param name="root"></param>
         /// <param name="mode"></param>
-        public Chord(string chordName, int tickFromStart)
+        public Chord(string chordName, int tickFromStart, int mode)
         {
+            //モードの登録
+            Mode = mode;
             //コードの開始時間を設定
             TickFromStart = tickFromStart;
 
@@ -91,12 +103,14 @@ namespace EnsembleCommander
             //Chordの長さはBase音の長さとする
             Gate = Base.Gate;
 
-            //WholeToneモード用にNotesListを初期化
-            SetWholeToneMode();
+            //伴奏音の設定
+            SetNotes(Mode);
 
             //PivotとPivotRangeを求める
             SetPivot();
         }
+
+        //-------------------------------------------------------------------------------------------------------
 
         /// <summary>
         /// コードネームからNoteナンバー(byte型)と構造(string型)を決定
@@ -226,6 +240,62 @@ namespace EnsembleCommander
         }
         
         /// <summary>
+        /// 伴奏音の設定
+        /// </summary>
+        public void SetNotes(int mode)
+        {
+            switch (mode)
+            {
+                case MODE_WHOLE: //全音符モードの設定;
+                    foreach (var element in Elements) NoteList.Add((NoteEvent)element.Clone());
+                    break;
+
+                case MODE_QUATER: //四分音符モードの設定
+                    for (int i = 0; i < 4; i++)
+                    {
+                        foreach (var element in Elements)
+                        {
+                            NoteEvent note = (NoteEvent)element.Clone();
+                            note.Gate = 240;
+                            note.Tick += i * 240;
+                            NoteList.Add(note);
+                        }
+                    }
+                    break;
+
+                case MODE_ARPEGGIO: //アルペジオモードの設定
+                    for (int i = 0; i < 3; i++)
+                    {
+                        NoteList.Add((NoteEvent)Elements[i].Clone());
+                        NoteList[i].Tick = TickFromStart + i * 240;
+                    }
+                    if(Elements.Length < 4)
+                    {
+                        NoteList.Add((NoteEvent)Elements[0].Clone());
+                        NoteList[3].Tick = TickFromStart + 3 * 240;
+                    }
+                    else
+                    {
+                        NoteList.Add((NoteEvent)Elements[3].Clone());
+                        NoteList[3].Tick = TickFromStart + 3 * 240;
+                    }
+                    break;
+
+                case MODE_FREE:
+                    foreach (var element in Elements) NoteList.Add((NoteEvent)element.Clone());
+                    foreach (var note in NoteList)
+                    {
+                        note.Velocity = 0;
+                    }
+                    break;
+
+                default:
+                    Console.WriteLine("Unknown mode");
+                    break;
+            }
+        }
+
+        /// <summary>
         /// PivotとPivotRangeを求める
         /// </summary>
         private void SetPivot()
@@ -237,6 +307,11 @@ namespace EnsembleCommander
             //Noteナンバーの範囲[0-127]を4つずつ32領域に分割をする
             //ただし伴奏で使う範囲（一度に画面に表示される演奏領域）の数は5と想定
 
+            SetRange();
+        }
+
+        public void SetRange()
+        {
             //計算したPivotがどのPivotRangeに配属されるかを調べる
             for (int rangeIndex = 0; rangeIndex < 31; rangeIndex++)
             {
@@ -248,59 +323,16 @@ namespace EnsembleCommander
             }
         }
 
-        /// <summary>
-        /// Elements配列からWholeTone用のNotesListを作成する
-        /// </summary>
-        private void SetWholeToneMode()
+        public void ShowNote()
         {
-            //NoteListをすべて削除
-            NotesList.Clear();
-            //Elementsの中身はWholeToneのNotes配列なのでコピーをリストに追加
-            NotesList.Add((NoteEvent[])Elements.Clone());
-        }
-
-        /// <summary>
-        /// Elements配列からQuaterTone用のNotesListを作成する
-        /// </summary>
-        private void SetQuaterTone()
-        {
-
-        }
-
-        /// <summary>
-        /// Elements配列からArppegio用のNotesListを作成する
-        /// </summary>
-        private void SetArppegioMode()
-        {
-            ClearTrack();
-            //アルペジオ用のNotes配列を準備
-            NoteEvent[] ArpeggioNotes = new NoteEvent[]
+            Console.WriteLine(NumOfTurn);
+            Console.WriteLine(PivotRange);
+            foreach (var note in NoteList)
             {
-                new NoteEvent(Elements[0].Note, 80, 240),//音高，音量，長さ
-                new NoteEvent(Elements[1].Note, 80, 240),
-                new NoteEvent(Elements[2].Note, 80, 240),
-                new NoteEvent(Elements[0].Note, 80, 240)
-            };
-            for (int i = 0; i < ArpeggioNotes.Length; i++)
-            {
-                ArpeggioNotes[i].Tick = TickFromStart + i * 240;
+                Console.WriteLine(note.Note);
             }
-
-            foreach (var note in ArpeggioNotes)
-                Track.Insert(note);
-
-            //NoteListをすべて削除したあとNotes配列を追加
-            NotesList.Clear();
-            NotesList.Add(ArpeggioNotes);
-
+            Console.WriteLine();
         }
 
-        /// <summary>
-        /// Elements配列からFree用のNotesListを作成する
-        /// </summary>
-        private void SetFreeMode()
-        {
-
-        }
     }
 }
