@@ -52,7 +52,7 @@ namespace EnsembleCommander
         /// </summary>
         public float Pivot;
         /// <summary>
-        /// コードの軸のある演奏領域(Range1～Range5).
+        /// コードの軸のある演奏領域(Range0～Range31).
         /// 動きの少ないコードの転回形の決定のため,1オクターブを3分割して領域を分ける.
         /// するとどのコードにおいても各領域につき一意に転回形が当てはまる.
         /// </summary>
