@@ -144,6 +144,7 @@ namespace EnsembleCommander
             }
             if (data.name.CompareTo("tap") == 0)
             {
+                midiManager.SetOnNote(player.MusicTime);
                 Console.WriteLine("tap");
             }
         }
@@ -486,18 +487,13 @@ namespace EnsembleCommander
                     Console.WriteLine(NowRange);
                     if (16-i != NowRange)
                     {
-                        Console.WriteLine("c");
-                        //SetRange(16-i);
-                        NowRange = 16-i;
-                        /*
+                        NowRange = 16-i;   
                         PivotList.Dispatcher.BeginInvoke(
-                            
                             new Action(() =>
                             {
-                                ((ListBoxItem)PivotList.Items[2]).IsSelected = true;
+                                PivotList.SelectedItem=NowRange;
                             }
                             ));
-                            */
                     }
                 }
             }
