@@ -18,6 +18,7 @@
                 <RadioButton x:Name="OnWholeTone" IsChecked="True" Content="Whole" Margin="5" Click="OnWholeTone_Click"/>
                 <RadioButton x:Name="OnQuarterTone" Content="Quarter" Margin="5" Click="OnQuarterTone_Click"/>
                 <RadioButton x:Name="OnArpeggio" Content="Arpeggio" Margin="5" Click="OnArpeggio_Click"/>
+                <RadioButton x:Name="OnDelay" Content="Delay" Margin="5" Click="OnDelay_Click"/>
                 <RadioButton x:Name="OnFree" Content="Free" Margin="5" Click="OnFree_Click"/>
             </StackPanel>
             <Button Name="OnNote" Content="Tap" Click="OnNote_Click"/>

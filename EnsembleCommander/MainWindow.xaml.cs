@@ -32,7 +32,8 @@ namespace EnsembleCommander
         private const int MODE_WHOLE = 0;
         private const int MODE_QUARTER = 1;
         private const int MODE_ARPEGGIO = 2;
-        private const int MODE_FREE = 3;
+        private const int MODE_DELAY = 3;
+        private const int MODE_FREE = 4;
 
         /// <summary>
         /// MIDI再生用オブジェクト
@@ -219,6 +220,17 @@ namespace EnsembleCommander
         {
             midiManager.ExchangeTrack(MODE_ARPEGGIO);
             NowMode = MODE_ARPEGGIO;
+        }
+
+        /// <summary>
+        /// Delayモード:反響音を鳴らす
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void OnDelay_Click(object sender, RoutedEventArgs e)
+        {
+            midiManager.ExchangeTrack(MODE_DELAY);
+            NowMode = MODE_DELAY;
         }
 
         /// <summary>
@@ -639,5 +651,7 @@ namespace EnsembleCommander
             PivotList.ItemsSource = null;
             PivotList.ItemsSource = Ranges;
         }
+
+        
     }
 }

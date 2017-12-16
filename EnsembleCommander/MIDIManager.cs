@@ -43,6 +43,7 @@ namespace EnsembleCommander
             "WHOLETONE",
             "QUARTERTONE",
             "ARPEGGIO",
+            "DELAY",
             "FREE"
         };
         public string[] inputedChord = { "C", "Am", "F", "G", "Em", "F", "G", "C" }; //背景楽曲のコード進行配列
@@ -52,7 +53,8 @@ namespace EnsembleCommander
         private const int MODE_WHOLE = 0;
         private const int MODE_QUARTER = 1;
         private const int MODE_ARPEGGIO = 2;
-        private const int MODE_FREE = 3;
+        private const int MODE_DELAY = 3;
+        private const int MODE_FREE = 4;
 
         public const int TICK_UNIT = 240*4;
 

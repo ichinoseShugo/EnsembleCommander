@@ -15,7 +15,8 @@ namespace EnsembleCommander
         private const int MODE_WHOLE = 0;
         private const int MODE_QUATER = 1;
         private const int MODE_ARPEGGIO = 2;
-        private const int MODE_FREE = 3;
+        private const int MODE_DELAY = 3;
+        private const int MODE_FREE = 4;
         /// <summary>
         /// 正規表現によるルート音(A,C#,Dbなど)のパターン
         /// </summary>
@@ -281,7 +282,21 @@ namespace EnsembleCommander
                     }
                     break;
 
-                case MODE_FREE:
+                case MODE_DELAY: //ディレイモードの設定
+                    for (int i = 0; i < 5; i++)
+                    {
+                        foreach (var element in Elements)
+                        {
+                            NoteEvent note = (NoteEvent)element.Clone();
+                            note.Gate = 180;
+                            note.Tick += i * 180;
+                            note.Velocity -= (byte)(i * 12);
+                            NoteList.Add(note);
+                        }
+                    }
+                    break;
+
+                case MODE_FREE: //フリーモードの設定
                     foreach (var element in Elements) NoteList.Add((NoteEvent)element.Clone());
                     foreach (var note in NoteList)
                     {
