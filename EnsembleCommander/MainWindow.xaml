@@ -14,11 +14,11 @@
                     <RadioButton x:Name="OffMidi" IsChecked="true" Content="MIDI Off" Margin="5" Click="OffMidi_Click"/>
                 </StackPanel>
                 <StackPanel Orientation="Horizontal">
-                    <RadioButton x:Name="OnWholeTone" IsChecked="True" Content="Whole" Margin="5" Click="OnWholeTone_Click"/>
-                    <RadioButton x:Name="OnQuarterTone" Content="Quarter" Margin="5" Click="OnQuarterTone_Click"/>
-                    <RadioButton x:Name="OnArpeggio" Content="Arpeggio" Margin="5" Click="OnArpeggio_Click"/>
-                    <RadioButton x:Name="OnDelay" Content="Delay" Margin="5" Click="OnDelay_Click"/>
-                    <RadioButton x:Name="OnFree" Content="Free" Margin="5" Click="OnFree_Click"/>
+                    <RadioButton x:Name="OnWholeTone" IsChecked="True" Content="Whole" Margin="5" Checked="OnWholeTone_Checked"/>
+                    <RadioButton x:Name="OnQuarterTone" Content="Quarter" Margin="5" Checked="OnQuarterTone_Checked"/>
+                    <RadioButton x:Name="OnArpeggio" Content="Arpeggio" Margin="5" Checked="OnArpeggio_Checked"/>
+                    <RadioButton x:Name="OnDelay" Content="Delay" Margin="5" Checked="OnDelay_Checked"/>
+                    <RadioButton x:Name="OnFree" Content="Free" Margin="5" Checked="OnFree_Checked"/>
                 </StackPanel>
                 <Button Name="OnNote" Content="Tap" Click="OnNote_Click"/>
                 <StackPanel Orientation="Horizontal">
