@@ -59,8 +59,8 @@ namespace EnsembleCommander
         PXCMHandModule handAnalyzer;
         PXCMHandData handData;
 
-        const int COLOR_WIDTH = 1280;
-        const int COLOR_HEIGHT = 720;
+        const int COLOR_WIDTH = 960;
+        const int COLOR_HEIGHT = 540;
         const int COLOR_FPS = 30;
 
         const int DEPTH_WIDTH = 640;
@@ -135,18 +135,15 @@ namespace EnsembleCommander
         {
             if (data.name.CompareTo("thumb_up") == 0)
             {
-                Console.WriteLine("thumb_up");
                 PlayMIDI();
             }
             if (data.name.CompareTo("fist") == 0)
             {
-                Console.WriteLine("fist");
                 StopMIDI();
             }
             if (data.name.CompareTo("tap") == 0)
             {
                 midiManager.SetOnNote(player.MusicTime);
-                Console.WriteLine("tap");
             }
         }
 
@@ -278,7 +275,7 @@ namespace EnsembleCommander
                 senseManager = PXCMSenseManager.CreateInstance();
 
                 //カラーストリームの有効
-                var sts = senseManager.EnableStream(PXCMCapture.StreamType.STREAM_TYPE_COLOR, 640, 480, 30);
+                var sts = senseManager.EnableStream(PXCMCapture.StreamType.STREAM_TYPE_COLOR, COLOR_WIDTH, COLOR_HEIGHT, COLOR_FPS);
                 if (sts < pxcmStatus.PXCM_STATUS_NO_ERROR)
                 {
                     throw new Exception("Colorストリームの有効化に失敗しました");
@@ -388,6 +385,7 @@ namespace EnsembleCommander
             }
             //手のデータを更新
             UpdateHandFrame();
+            ///*
             //演奏領域の表示
             for (int k = 0; k < 5; k++)
             {
@@ -401,6 +399,7 @@ namespace EnsembleCommander
                     1.0d,
                     myBrush);
             }
+            //*/
             //フレームを解放する
             senseManager.ReleaseFrame();
         }
@@ -493,10 +492,8 @@ namespace EnsembleCommander
 
             for(int i=0; i<5; i++)
             {
-                Console.WriteLine("a");
                 if ((imageColor.Height / 5) * i <= colorPoint[0].y && colorPoint[0].y < (imageColor.Height / 5) * (i + 1))
                 {
-                    Console.WriteLine(NowRange);
                     if (16-i != NowRange)
                     {
                         NowRange = 16-i;   
@@ -509,7 +506,6 @@ namespace EnsembleCommander
                     }
                 }
             }
-
             AddEllipse(
                 new Point(colorPoint[0].x, colorPoint[0].y),
                 5,
