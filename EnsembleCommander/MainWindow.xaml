@@ -22,16 +22,10 @@
                 <RadioButton x:Name="OnFree" Content="Free" Margin="5" Click="OnFree_Click"/>
             </StackPanel>
             <Button Name="OnNote" Content="Tap" Click="OnNote_Click"/>
-            <Label Content="TONALITY"/>
-            <StackPanel Orientation="Horizontal">
-                <RadioButton x:Name="Major" IsChecked="true" Content="Major" Margin="5" Click="Major_Click"/>
-                <RadioButton x:Name="Minor" Content="Minor" Margin="5" Click="Minor_Click"/>
-            </StackPanel>
             <Grid Name="Score" Height="100" Width="320">
                 <Border BorderThickness="1" BorderBrush="#FF00A1FF" />
                 <Line Name="CurrentLine" StrokeThickness="5" X1="0" Y1="0" X2="0" Y2="100" Stroke="#FF3062E8" />
             </Grid>
-            <Button Name="DisplayElements" Content="DisplayElements" Click="DisplayElements_Click"/>
         </StackPanel>
         <ListBox Name="PivotList" Width="160" SelectionChanged="PivotList_SelectionChanged"/>
         <StackPanel>

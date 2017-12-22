@@ -44,11 +44,6 @@ namespace EnsembleCommander
         /// </summary>
         int NowRange = -1;
 
-        /// <summary>
-        /// 現在の調性(長調か短調か)
-        /// </summary>
-        public string NowTonality = "major";
-
         public bool IsConnectRealSense = false;
 
         PXCMSenseManager senseManager;
@@ -180,11 +175,7 @@ namespace EnsembleCommander
                  OffMidi.IsChecked = true;
              })
             );
-            //転回したものを初期化
-            foreach (var chord in midiManager.chordProgList[MODE_WHOLE]) chord.SetNotes(MODE_WHOLE);
-            foreach (var chord in midiManager.chordProgList[MODE_QUARTER]) chord.SetNotes(MODE_QUARTER);
             foreach (var chord in midiManager.chordProgList[MODE_ARPEGGIO]) chord.SetNotes(MODE_ARPEGGIO);
-            foreach (var chord in midiManager.chordProgList[MODE_DELAY]) chord.SetNotes(MODE_DELAY);
             foreach (var chord in midiManager.chordProgList[MODE_FREE]) chord.SetNotes(MODE_FREE);
         }
 
@@ -270,44 +261,8 @@ namespace EnsembleCommander
         /// <param name="e"></param>
         private void PivotList_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            //TODO: 今のモードを展開しているが、モードを変更したら転回が反映されてないのを何とかする
-            midiManager.SetRange((int)PivotList.SelectedItem, player.MusicTime, NowMode);
+            midiManager.SetRange((int)PivotList.SelectedItem, player.MusicTime,NowMode);
             NowRange = (int)PivotList.SelectedItem;
-        }
-
-        /// <summary>
-        /// Majorダイアトニックに書き換える
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private void Major_Click(object sender, RoutedEventArgs e)
-        {
-            if(NowTonality == "minor")
-                midiManager.TurnMajor(player.MusicTime, NowMode);
-            NowTonality = "major";
-        }
-
-        /// <summary>
-        /// Minorダイアトニックに書き換える
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private void Minor_Click(object sender, RoutedEventArgs e)
-        {
-            if (NowTonality == "major")
-                midiManager.TurnMinor(player.MusicTime, NowMode);
-            NowTonality = "minor";
-        }
-
-        /// <summary>
-        /// Elementsが変わっていないことを自由に確認したい
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private void DisplayElements_Click(object sender, RoutedEventArgs e)
-        {
-            
-            
         }
 
         //RealSenseメソッド-------------------------------------------------------------------
@@ -697,5 +652,6 @@ namespace EnsembleCommander
             PivotList.ItemsSource = Ranges;
         }
 
+        
     }
 }
