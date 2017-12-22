@@ -59,14 +59,23 @@ namespace EnsembleCommander
         PXCMHandModule handAnalyzer;
         PXCMHandData handData;
 
-        const int COLOR_WIDTH = 1280;
-        const int COLOR_HEIGHT = 720;
+        const int COLOR_WIDTH = 960;
+        const int COLOR_HEIGHT = 540;
         const int COLOR_FPS = 30;
 
         const int DEPTH_WIDTH = 640;
         const int DEPTH_HEIGHT = 480;
         const int DEPTH_FPS = 30;
-
+        Brush[] brushes = new Brush[]{Brushes.Red,
+                                    Brushes.OrangeRed,
+                                    Brushes.Orange,
+                                    Brushes.Yellow,
+                                    Brushes.YellowGreen,
+                                    Brushes.Green,
+                                    Brushes.LightBlue,
+                                    Brushes.Blue,
+                                    Brushes.Navy,
+                                    Brushes.Purple };
         Color[] colors = new Color[]{Colors.Red,
                                     Colors.OrangeRed,
                                     Colors.Orange,
@@ -135,18 +144,15 @@ namespace EnsembleCommander
         {
             if (data.name.CompareTo("thumb_up") == 0)
             {
-                Console.WriteLine("thumb_up");
                 PlayMIDI();
             }
             if (data.name.CompareTo("fist") == 0)
             {
-                Console.WriteLine("fist");
                 StopMIDI();
             }
             if (data.name.CompareTo("tap") == 0)
             {
                 midiManager.SetOnNote(player.MusicTime);
-                Console.WriteLine("tap");
             }
         }
 
@@ -194,10 +200,13 @@ namespace EnsembleCommander
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        private void OnWholeTone_Click(object sender, RoutedEventArgs e)
+        private void OnWholeTone_Checked(object sender, RoutedEventArgs e)
         {
-            midiManager.ExchangeTrack(MODE_WHOLE);
-            NowMode = MODE_WHOLE;
+            if (midiManager != null)
+            {
+                midiManager.ExchangeTrack(MODE_WHOLE);
+                NowMode = MODE_WHOLE;
+            }
         }
 
         /// <summary>
@@ -205,7 +214,7 @@ namespace EnsembleCommander
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        private void OnQuarterTone_Click(object sender, RoutedEventArgs e)
+        private void OnQuarterTone_Checked(object sender, RoutedEventArgs e)
         {
             midiManager.ExchangeTrack(MODE_QUARTER);
             NowMode = MODE_QUARTER;
@@ -216,7 +225,7 @@ namespace EnsembleCommander
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        private void OnArpeggio_Click(object sender, RoutedEventArgs e)
+        private void OnArpeggio_Checked(object sender, RoutedEventArgs e)
         {
             midiManager.ExchangeTrack(MODE_ARPEGGIO);
             NowMode = MODE_ARPEGGIO;
@@ -227,7 +236,7 @@ namespace EnsembleCommander
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        private void OnDelay_Click(object sender, RoutedEventArgs e)
+        private void OnDelay_Checked(object sender, RoutedEventArgs e)
         {
             midiManager.ExchangeTrack(MODE_DELAY);
             NowMode = MODE_DELAY;
@@ -238,7 +247,7 @@ namespace EnsembleCommander
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        private void OnFree_Click(object sender, RoutedEventArgs e)
+        private void OnFree_Checked(object sender, RoutedEventArgs e)
         {
             midiManager.ExchangeTrack(MODE_FREE);
             NowMode = MODE_FREE;
@@ -278,7 +287,7 @@ namespace EnsembleCommander
                 senseManager = PXCMSenseManager.CreateInstance();
 
                 //カラーストリームの有効
-                var sts = senseManager.EnableStream(PXCMCapture.StreamType.STREAM_TYPE_COLOR, 640, 480, 30);
+                var sts = senseManager.EnableStream(PXCMCapture.StreamType.STREAM_TYPE_COLOR, COLOR_WIDTH, COLOR_HEIGHT, COLOR_FPS);
                 if (sts < pxcmStatus.PXCM_STATUS_NO_ERROR)
                 {
                     throw new Exception("Colorストリームの有効化に失敗しました");
@@ -401,6 +410,11 @@ namespace EnsembleCommander
                     1.0d,
                     myBrush);
             }
+            //モードアイコンの表示
+            for (int mode = 0; mode < midiManager.ModeList.Length; mode++)
+            {
+                AddEllipse(new Point(50 + 50 * mode, 50), 50, brushes[mode], 1);
+            }
             //フレームを解放する
             senseManager.ReleaseFrame();
         }
@@ -462,20 +476,17 @@ namespace EnsembleCommander
                 }
 
                 GetFingerData(hand, PXCMHandData.JointType.JOINT_MIDDLE_TIP);
-
-                /*
-                // 指の関節を列挙する
-                for (int j = 0; j < PXCMHandData.NUMBER_OF_JOINTS; j++)
-                {
-                    if (!ShowFingerPosition(hand, (PXCMHandData.JointType)i)) continue;
-                }
-                */
             }
         }
 
+        /// <summary>
+        /// 指のデータを取得する
+        /// </summary>
+        /// <param name="hand"></param>
+        /// <param name="jointType"></param>
+        /// <returns></returns>
         private bool GetFingerData(PXCMHandData.IHand hand, PXCMHandData.JointType jointType)
         {
-            // 指のデータを取得する
             PXCMHandData.JointData jointData;
             var sts = hand.QueryTrackedJoint(jointType, out jointData);
             if (sts < pxcmStatus.PXCM_STATUS_NO_ERROR)
@@ -491,12 +502,11 @@ namespace EnsembleCommander
             depthPoint[0].z = jointData.positionWorld.z * 1000;
             projection.MapDepthToColor(depthPoint, colorPoint);
 
+            //演奏領域の当たり判定
             for(int i=0; i<5; i++)
             {
-                Console.WriteLine("a");
                 if ((imageColor.Height / 5) * i <= colorPoint[0].y && colorPoint[0].y < (imageColor.Height / 5) * (i + 1))
                 {
-                    Console.WriteLine(NowRange);
                     if (16-i != NowRange)
                     {
                         NowRange = 16-i;   
@@ -509,12 +519,43 @@ namespace EnsembleCommander
                     }
                 }
             }
-
-            AddEllipse(
-                new Point(colorPoint[0].x, colorPoint[0].y),
-                5,
-                Brushes.White,
-                1);
+            //モードアイコンとの当たり判定
+            for (int mode = 0; mode < midiManager.ModeList.Length; mode++)
+            {
+                int hitCenter = 50 + 50 * mode;
+                if ((hitCenter - 25 < colorPoint[0].x && colorPoint[0].x < hitCenter + 25) 
+                    && (25 < colorPoint[0].y && colorPoint[0].y < 75))
+                {
+                    Dispatcher.BeginInvoke(
+                            new Action(() =>
+                            {
+                                Console.WriteLine(mode);
+                                switch (mode)
+                                {
+                                    case MODE_WHOLE:
+                                        OnWholeTone.IsChecked = true;
+                                        break;
+                                    case MODE_ARPEGGIO:
+                                        OnArpeggio.IsChecked = true;
+                                        break;
+                                    case MODE_QUARTER:
+                                        OnQuarterTone.IsChecked = true;
+                                        break;
+                                    case MODE_DELAY:
+                                        OnDelay.IsChecked = true;
+                                        break;
+                                    case MODE_FREE:
+                                        OnFree.IsChecked = true;
+                                        break;
+                                    default:
+                                        break;
+                                }
+                            }
+                            ));
+                    break;
+                }
+            }
+            AddEllipse(new Point(colorPoint[0].x, colorPoint[0].y), 5, Brushes.White, 1);
 
             return true;
         }
@@ -651,7 +692,5 @@ namespace EnsembleCommander
             PivotList.ItemsSource = null;
             PivotList.ItemsSource = Ranges;
         }
-
-        
     }
 }

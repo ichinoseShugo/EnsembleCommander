@@ -5,37 +5,37 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:EnsembleCommander"
         mc:Ignorable="d"
-        Title="MainWindow" Height="600" Width="1450" Loaded="Window_Loaded" Unloaded="Window_Unloaded">
-    <StackPanel Orientation="Horizontal">
-        <StackPanel Width="320">
-            <Label Content="MIDI"/>
-            <StackPanel Orientation="Horizontal">
-                <RadioButton x:Name="OnMidi" Content="MIDI On" Margin="5" Click="OnMidi_Click"/>
-                <RadioButton x:Name="OffMidi" IsChecked="true" Content="MIDI Off" Margin="5" Click="OffMidi_Click"/>
+        Title="MainWindow" Height="670" Width="1000" Loaded="Window_Loaded" Unloaded="Window_Unloaded">
+    <StackPanel>
+        <StackPanel Orientation="Horizontal">
+            <StackPanel>
+                <StackPanel Orientation="Horizontal">
+                    <RadioButton x:Name="OnMidi" Content="MIDI On" Margin="5" Click="OnMidi_Click"/>
+                    <RadioButton x:Name="OffMidi" IsChecked="true" Content="MIDI Off" Margin="5" Click="OffMidi_Click"/>
+                </StackPanel>
+                <StackPanel Orientation="Horizontal">
+                    <RadioButton x:Name="OnWholeTone" IsChecked="True" Content="Whole" Margin="5" Checked="OnWholeTone_Checked"/>
+                    <RadioButton x:Name="OnQuarterTone" Content="Quarter" Margin="5" Checked="OnQuarterTone_Checked"/>
+                    <RadioButton x:Name="OnArpeggio" Content="Arpeggio" Margin="5" Checked="OnArpeggio_Checked"/>
+                    <RadioButton x:Name="OnDelay" Content="Delay" Margin="5" Checked="OnDelay_Checked"/>
+                    <RadioButton x:Name="OnFree" Content="Free" Margin="5" Checked="OnFree_Checked"/>
+                </StackPanel>
+                <Button Name="OnNote" Content="Tap" Click="OnNote_Click"/>
+                <StackPanel Orientation="Horizontal">
+                    <Label Name="ConnectCheck" Content="UnConnect"/>
+                    <Label Name="HandID" Content="none"/>
+                </StackPanel>
             </StackPanel>
-            <Label Content="MODE"/>
-            <StackPanel Orientation="Horizontal">
-                <RadioButton x:Name="OnWholeTone" IsChecked="True" Content="Whole" Margin="5" Click="OnWholeTone_Click"/>
-                <RadioButton x:Name="OnQuarterTone" Content="Quarter" Margin="5" Click="OnQuarterTone_Click"/>
-                <RadioButton x:Name="OnArpeggio" Content="Arpeggio" Margin="5" Click="OnArpeggio_Click"/>
-                <RadioButton x:Name="OnDelay" Content="Delay" Margin="5" Click="OnDelay_Click"/>
-                <RadioButton x:Name="OnFree" Content="Free" Margin="5" Click="OnFree_Click"/>
-            </StackPanel>
-            <Button Name="OnNote" Content="Tap" Click="OnNote_Click"/>
-            <Grid Name="Score" Height="100" Width="320">
+            <Grid Name="Score" Width="500" Height="100">
                 <Border BorderThickness="1" BorderBrush="#FF00A1FF" />
                 <Line Name="CurrentLine" StrokeThickness="5" X1="0" Y1="0" X2="0" Y2="100" Stroke="#FF3062E8" />
             </Grid>
         </StackPanel>
-        <ListBox Name="PivotList" Width="160" SelectionChanged="PivotList_SelectionChanged"/>
-        <StackPanel>
-            <StackPanel Orientation="Horizontal">
-                <Label Name="ConnectCheck" Content="UnConnect"/>
-                <Label Name="HandID" Content="none"/>
-            </StackPanel>
-            <Grid Width="640">
-                <Image Name="imageColor" Height="540" Width="960"/>
-                <Canvas x:Name="CanvasFaceParts" Height="540" Width="960"/>
+        <StackPanel Orientation="Horizontal">
+            <ListBox Name="PivotList" Width="40" SelectionChanged="PivotList_SelectionChanged"/>
+            <Grid>
+                <Image Name="imageColor" Width="960" Height="540"/>
+                <Canvas x:Name="CanvasFaceParts"/>
             </Grid>
         </StackPanel>
     </StackPanel>

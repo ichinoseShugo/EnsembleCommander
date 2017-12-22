@@ -38,7 +38,7 @@ namespace EnsembleCommander
         /// <summary>
         /// モードのリスト
         /// </summary>
-        string[] ModeList = new string[]
+        public string[] ModeList = new string[]
         {
             "WHOLETONE",
             "QUARTERTONE",
