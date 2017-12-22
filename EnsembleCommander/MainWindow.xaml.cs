@@ -44,6 +44,11 @@ namespace EnsembleCommander
         /// </summary>
         int NowRange = -1;
 
+        /// <summary>
+        /// 現在の調性(長調か短調か)
+        /// </summary>
+        public string NowTonality = "major";
+
         public bool IsConnectRealSense = false;
 
         PXCMSenseManager senseManager;
@@ -181,7 +186,11 @@ namespace EnsembleCommander
                  OffMidi.IsChecked = true;
              })
             );
+            //転回したものを初期化
+            foreach (var chord in midiManager.chordProgList[MODE_WHOLE]) chord.SetNotes(MODE_WHOLE);
+            foreach (var chord in midiManager.chordProgList[MODE_QUARTER]) chord.SetNotes(MODE_QUARTER);
             foreach (var chord in midiManager.chordProgList[MODE_ARPEGGIO]) chord.SetNotes(MODE_ARPEGGIO);
+            foreach (var chord in midiManager.chordProgList[MODE_DELAY]) chord.SetNotes(MODE_DELAY);
             foreach (var chord in midiManager.chordProgList[MODE_FREE]) chord.SetNotes(MODE_FREE);
         }
 
@@ -270,8 +279,44 @@ namespace EnsembleCommander
         /// <param name="e"></param>
         private void PivotList_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            midiManager.SetRange((int)PivotList.SelectedItem, player.MusicTime,NowMode);
+            //TODO: 今のモードを展開しているが、モードを変更したら転回が反映されてないのを何とかする
+            midiManager.SetRange((int)PivotList.SelectedItem, player.MusicTime, NowMode);
             NowRange = (int)PivotList.SelectedItem;
+        }
+
+        /// <summary>
+        /// Majorダイアトニックに書き換える
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void Major_Click(object sender, RoutedEventArgs e)
+        {
+            if (NowTonality == "minor")
+                midiManager.TurnMajor(player.MusicTime, NowMode);
+            NowTonality = "major";
+        }
+
+        /// <summary>
+        /// Minorダイアトニックに書き換える
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void Minor_Click(object sender, RoutedEventArgs e)
+        {
+            if (NowTonality == "major")
+                midiManager.TurnMinor(player.MusicTime, NowMode);
+            NowTonality = "minor";
+        }
+
+        /// <summary>
+        /// Elementsが変わっていないことを自由に確認したい
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void DisplayElements_Click(object sender, RoutedEventArgs e)
+        {
+
+
         }
 
         //RealSenseメソッド-------------------------------------------------------------------
@@ -503,17 +548,17 @@ namespace EnsembleCommander
             projection.MapDepthToColor(depthPoint, colorPoint);
 
             //演奏領域の当たり判定
-            for(int i=0; i<5; i++)
+            for (int i = 0; i < 5; i++)
             {
                 if ((imageColor.Height / 5) * i <= colorPoint[0].y && colorPoint[0].y < (imageColor.Height / 5) * (i + 1))
                 {
-                    if (16-i != NowRange)
+                    if (16 - i != NowRange)
                     {
-                        NowRange = 16-i;   
+                        NowRange = 16 - i;
                         PivotList.Dispatcher.BeginInvoke(
                             new Action(() =>
                             {
-                                PivotList.SelectedItem=NowRange;
+                                PivotList.SelectedItem = NowRange;
                             }
                             ));
                     }
@@ -523,7 +568,7 @@ namespace EnsembleCommander
             for (int mode = 0; mode < midiManager.ModeList.Length; mode++)
             {
                 int hitCenter = 50 + 50 * mode;
-                if ((hitCenter - 25 < colorPoint[0].x && colorPoint[0].x < hitCenter + 25) 
+                if ((hitCenter - 25 < colorPoint[0].x && colorPoint[0].x < hitCenter + 25)
                     && (25 < colorPoint[0].y && colorPoint[0].y < 75))
                 {
                     Dispatcher.BeginInvoke(
@@ -665,7 +710,7 @@ namespace EnsembleCommander
         /// </summary>
         private void UpdateMIDI()
         {
-            double pos = (MidiManager.TICK_UNIT * player.MusicTime.Measure + player.MusicTime.Tick) 
+            double pos = (MidiManager.TICK_UNIT * player.MusicTime.Measure + player.MusicTime.Tick)
                 / (double)(MidiManager.TICK_UNIT * midiManager.inputedChord.Length)
                 * Score.Width;
             CurrentLine.X1 = pos;
