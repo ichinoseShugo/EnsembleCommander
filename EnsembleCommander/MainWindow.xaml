@@ -20,6 +20,10 @@
                     <RadioButton x:Name="OnDelay" Content="Delay" Margin="5" Checked="OnDelay_Checked"/>
                     <RadioButton x:Name="OnFree" Content="Free" Margin="5" Checked="OnFree_Checked"/>
                 </StackPanel>
+                <StackPanel Orientation="Horizontal">
+                    <RadioButton x:Name="Major" IsChecked="true" Content="Major" Margin="5" Click="Major_Click"/>
+                    <RadioButton x:Name="Minor" Content="Minor" Margin="5" Click="Minor_Click"/>
+                </StackPanel>
                 <Button Name="OnNote" Content="Tap" Click="OnNote_Click"/>
                 <StackPanel Orientation="Horizontal">
                     <Label Name="ConnectCheck" Content="UnConnect"/>

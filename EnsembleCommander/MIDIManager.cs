@@ -47,8 +47,77 @@ namespace EnsembleCommander
             "FREE"
         };
         public string[] inputedChord = { "C", "Am", "F", "G", "Em", "F", "G", "C" }; //背景楽曲のコード進行配列
+        //public string[] inputedChord = { "C", "G", "Am", "Em", "F", "C", "F", "G" }; //背景楽曲のコード進行配列 
         //public string[] inputedChord = { "D", "A", "Bm", "F#m", "G", "D", "G", "A" }; //背景楽曲のコード進行配列 
         //public string[] inputedChord = { "F", "Fm", "Em", "A7" }; //白松研においでよ
+        public byte KeyNoteNumber = 60;
+        //public string KeyNote = "C";//将来的に使うかもしれない
+
+        /// <summary>
+        /// KeyNoteのNoteNumberを取得
+        /// </summary>
+        /// <param name="KeyNote"></param>
+        /// <returns></returns>
+        public byte StringToKeyNum(string KeyNote)
+        {
+            byte KeyNoteNumber = 60;
+            switch (KeyNote)
+            {
+                case "C":
+                    KeyNoteNumber = 60;
+                    break;
+                case "C#":
+                    KeyNoteNumber = 61;
+                    break;
+                case "Db":
+                    KeyNoteNumber = 61;
+                    break;
+                case "D":
+                    KeyNoteNumber = 62;
+                    break;
+                case "D#":
+                    KeyNoteNumber = 63;
+                    break;
+                case "Eb":
+                    KeyNoteNumber = 63;
+                    break;
+                case "E":
+                    KeyNoteNumber = 64;
+                    break;
+                case "F":
+                    KeyNoteNumber = 65;
+                    break;
+                case "F#":
+                    KeyNoteNumber = 66;
+                    break;
+                case "Gb":
+                    KeyNoteNumber = 66;
+                    break;
+                case "G":
+                    KeyNoteNumber = 67;
+                    break;
+                case "G#":
+                    KeyNoteNumber = 68;
+                    break;
+                case "Ab":
+                    KeyNoteNumber = 68;
+                    break;
+                case "A":
+                    KeyNoteNumber = 69;
+                    break;
+                case "A#":
+                    KeyNoteNumber = 70;
+                    break;
+                case "Bb":
+                    KeyNoteNumber = 70;
+                    break;
+                case "B":
+                    KeyNoteNumber = 71;
+                    break;
+            }
+            return KeyNoteNumber;
+        }
+
         //MODE用定数
         private const int MODE_WHOLE = 0;
         private const int MODE_QUARTER = 1;
@@ -56,7 +125,7 @@ namespace EnsembleCommander
         private const int MODE_DELAY = 3;
         private const int MODE_FREE = 4;
 
-        public const int TICK_UNIT = 240*4;
+        public const int TICK_UNIT = 240 * 4;
 
         /// <summary>
         /// MIDIの初期化
@@ -70,14 +139,15 @@ namespace EnsembleCommander
             //モードの数だけコード進行配列の要素数を用意する
             chordProgList = new List<Chord>[NumOfMode];
             //コード進行配列の初期化
-            for (int i=0; i<NumOfMode; i++)
+            for (int i = 0; i < NumOfMode; i++)
             {
                 tracks[i] = new MidiTrack();
                 chordProgList[i] = new List<Chord>();
             }
 
             //Modeの数だけコード進行配列の初期化
-            for (int mode=0; mode<NumOfMode; mode++) {
+            for (int mode = 0; mode < NumOfMode; mode++)
+            {
                 //コードの開始位置を0に初期化
                 int ChordTickFromStart = 0;
                 //入力コード進行(chordProgress)からコード進行リストを初期化する
@@ -114,7 +184,7 @@ namespace EnsembleCommander
         /// <summary>
         /// ユーザ指定したRangeにコードを転回してPivotRangeを移動する
         /// </summary>
-        public void SetRange(int Range, MusicTime time ,int mode)
+        public void SetRange(int Range, MusicTime time, int mode)
         {
             // 小節のコードのPivotRangeとユーザが指定したRangeとの差分だけ転回
             for (int measure = time.Measure; measure < chordProgList[mode].Count; measure++)
@@ -123,7 +193,7 @@ namespace EnsembleCommander
                 Turn(Range - chordProgList[mode][measure].PivotRange, measure, chordProgList[mode][measure]);
             }
         }
-        
+
         /// <summary>
         /// 転回メソッド : i小節目のコードをk回だけ転回する
         /// </summary>
@@ -138,7 +208,7 @@ namespace EnsembleCommander
                 {
                     // NoteListの中でnoteナンバーが一番小さいものを一オクターブ上げる
                     byte min = byte.MaxValue;
-                    for(int j=0; j < chord.NoteList.Count; j++)
+                    for (int j = 0; j < chord.NoteList.Count; j++)
                     {
                         if (chord.NoteList[j].Note < min)
                         {
@@ -171,23 +241,23 @@ namespace EnsembleCommander
             //転回数の更新
             chord.NumOfTurn += times;
         }
-        
+
         /// <summary>
         /// 自由なタイミングに和音
         /// </summary>
         public void SetOnNote(MusicTime time)
         {
             //タップタイミングの1ms後のタイミングに演奏音を書き換え
-            if(time.Measure<inputedChord.Length)
-            foreach (var note in chordProgList[MODE_FREE][time.Measure].NoteList)
-            {
-                note.Tick = TICK_UNIT * time.Measure + time.Tick + 1;
-                note.Velocity = 80;
-                note.Gate = 240;
-                note.Speed = 120;
-            }
+            if (time.Measure < inputedChord.Length)
+                foreach (var note in chordProgList[MODE_FREE][time.Measure].NoteList)
+                {
+                    note.Tick = TICK_UNIT * time.Measure + time.Tick + 1;
+                    note.Velocity = 80;
+                    note.Gate = 240;
+                    note.Speed = 120;
+                }
         }
-        
+
         /// <summary>
         /// 演奏中のトラックと入力したモードのトラックを入れ替える
         /// </summary>
@@ -196,6 +266,97 @@ namespace EnsembleCommander
         {
             midiData.Tracks.Add(tracks[mode]);
             midiData.Tracks.RemoveAt(0);
+        }
+
+
+        /* MEMO
+         * 
+         * 将来的にユーザがコード進行を作っていく場合に、
+         * 曲内で使われるコードはダイアトニックコード内から選択されることを想定している。
+         * その場合、システムがダイアトニックコードを決定するためにユーザは最初に曲のKey(調)を指定することになる。
+         * その入力をKeyNoteとする。
+         * (参考)ダイアトニックコードについて：https://www.studiorag.com/blog/fushimiten/diatonic-chord?disp=more
+         * 
+         * ただしメジャーダイアトニックコード⇔マイナーダイアトニックコードの変換だと不自然に聞こえたため、今回は以下の変換を行った。
+         * Ⅰ, Ⅱm, Ⅲm, Ⅳ, Ⅴ, Ⅵm, Ⅶm-5
+         * ↓
+         * Ⅰm, Ⅱm-5, Ⅲm, Ⅳm, Ⅴ, Ⅵm-5, Ⅶm-5
+         * 
+         */
+        /// <summary>
+        /// コードを長調(明るい)に書き換える
+        /// </summary>
+        public void TurnMajor(MusicTime time, int mode)
+        {
+            // 以降のコードをメジャーに書き換える
+            for (int measure = time.Measure; measure < chordProgList[mode].Count; measure++)
+            {
+                if (chordProgList[mode][measure].NoteList[0].Note % 12 == KeyNoteNumber % 12) //1
+                {
+                    chordProgList[mode][measure].NoteList[1].Note += 1;
+                }
+                else if (chordProgList[mode][measure].NoteList[0].Note % 12 == KeyNoteNumber % 12 + 2) //2
+                {
+                    chordProgList[mode][measure].NoteList[2].Note += 1;
+                }
+                else if (chordProgList[mode][measure].NoteList[0].Note % 12 == KeyNoteNumber % 12 + 4) //3
+                {
+                }
+                else if (chordProgList[mode][measure].NoteList[0].Note % 12 == KeyNoteNumber % 12 + 5) //4
+
+                {
+                    chordProgList[mode][measure].NoteList[1].Note += 1;
+                }
+                else if (chordProgList[mode][measure].NoteList[0].Note % 12 == KeyNoteNumber % 12 + 7) //5
+                {
+                }
+                else if (chordProgList[mode][measure].NoteList[0].Note % 12 == KeyNoteNumber % 12 + 9) //6
+                {
+                    // chordProgList[mode][measure].NoteList[2].Note += 1;
+                }
+                else if (chordProgList[mode][measure].NoteList[0].Note % 12 == KeyNoteNumber % 12 + 11) //7
+                {
+                }
+
+            }
+        }
+
+        /// <summary>
+        /// コードを短調(暗い)に書き換える
+        /// </summary>
+        public void TurnMinor(MusicTime time, int mode)
+        {
+            // 以降のコードをマイナーに書き換える
+            for (int measure = time.Measure; measure < chordProgList[mode].Count; measure++)
+            {
+                if (chordProgList[mode][measure].NoteList[0].Note % 12 == KeyNoteNumber % 12) //1
+                {
+                    chordProgList[mode][measure].NoteList[1].Note -= 1;
+                }
+                else if (chordProgList[mode][measure].NoteList[0].Note % 12 == KeyNoteNumber % 12 + 2) //2
+                {
+                    chordProgList[mode][measure].NoteList[2].Note -= 1;
+                }
+                else if (chordProgList[mode][measure].NoteList[0].Note % 12 == KeyNoteNumber % 12 + 4) //3
+                {
+                }
+                else if (chordProgList[mode][measure].NoteList[0].Note % 12 == KeyNoteNumber % 12 + 5) //4
+                {
+                    chordProgList[mode][measure].NoteList[1].Note -= 1;
+                }
+                else if (chordProgList[mode][measure].NoteList[0].Note % 12 == KeyNoteNumber % 12 + 7) //5
+                {
+                }
+                else if (chordProgList[mode][measure].NoteList[0].Note % 12 == KeyNoteNumber % 12 + 9) //6
+                {
+                    // 
+                    chordProgList[mode][measure].NoteList[2].Note -= 1;
+                }
+                else if (chordProgList[mode][measure].NoteList[0].Note % 12 == KeyNoteNumber % 12 + 11) //7
+                {
+                }
+
+            }
         }
 
     }
