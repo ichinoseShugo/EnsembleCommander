@@ -312,7 +312,7 @@ namespace EnsembleCommander
                 }
                 else if (chordProgList[mode][measure].NoteList[0].Note % 12 == KeyNoteNumber % 12 + 9) //6
                 {
-                    // chordProgList[mode][measure].NoteList[2].Note += 1;
+                    chordProgList[mode][measure].NoteList[2].Note += 1;
                 }
                 else if (chordProgList[mode][measure].NoteList[0].Note % 12 == KeyNoteNumber % 12 + 11) //7
                 {
@@ -348,8 +348,7 @@ namespace EnsembleCommander
                 {
                 }
                 else if (chordProgList[mode][measure].NoteList[0].Note % 12 == KeyNoteNumber % 12 + 9) //6
-                {
-                    // 
+                { 
                     chordProgList[mode][measure].NoteList[2].Note -= 1;
                 }
                 else if (chordProgList[mode][measure].NoteList[0].Note % 12 == KeyNoteNumber % 12 + 11) //7

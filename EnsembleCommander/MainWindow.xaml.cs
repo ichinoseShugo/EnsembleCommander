@@ -43,11 +43,11 @@ namespace EnsembleCommander
         /// 現在選択しているRange
         /// </summary>
         int NowRange = -1;
-
         /// <summary>
         /// 現在の調性(長調か短調か)
         /// </summary>
         public string NowTonality = "major";
+
 
         public bool IsConnectRealSense = false;
 
@@ -186,12 +186,31 @@ namespace EnsembleCommander
                  OffMidi.IsChecked = true;
              })
             );
+            /*
             //転回したものを初期化
             foreach (var chord in midiManager.chordProgList[MODE_WHOLE]) chord.SetNotes(MODE_WHOLE);
             foreach (var chord in midiManager.chordProgList[MODE_QUARTER]) chord.SetNotes(MODE_QUARTER);
             foreach (var chord in midiManager.chordProgList[MODE_ARPEGGIO]) chord.SetNotes(MODE_ARPEGGIO);
             foreach (var chord in midiManager.chordProgList[MODE_DELAY]) chord.SetNotes(MODE_DELAY);
             foreach (var chord in midiManager.chordProgList[MODE_FREE]) chord.SetNotes(MODE_FREE);
+            */
+
+            // コードリストの初期化チェック
+            int i=0;
+            foreach (var chord in midiManager.chordProgList[MODE_WHOLE])
+            {
+                chord.SetNotes(MODE_WHOLE);
+                Console.WriteLine("MODE_WHOLE[0]:" + midiManager.chordProgList[MODE_WHOLE][i].NoteList[0].Note);
+                Console.WriteLine("MODE_WHOLE[1]:" + midiManager.chordProgList[MODE_WHOLE][i].NoteList[1].Note);
+                Console.WriteLine("MODE_WHOLE[2]:" + midiManager.chordProgList[MODE_WHOLE][i].NoteList[2].Note);
+                i++;
+            }
+            foreach (var chord in midiManager.chordProgList[MODE_QUARTER]) chord.SetNotes(MODE_QUARTER);
+            foreach (var chord in midiManager.chordProgList[MODE_ARPEGGIO]) chord.SetNotes(MODE_ARPEGGIO);
+            foreach (var chord in midiManager.chordProgList[MODE_DELAY]) chord.SetNotes(MODE_DELAY);
+            foreach (var chord in midiManager.chordProgList[MODE_FREE]) chord.SetNotes(MODE_FREE);
+
+
         }
 
         /// <summary>
@@ -285,19 +304,19 @@ namespace EnsembleCommander
         }
 
         /// <summary>
-        /// Majorダイアトニックに書き換える
+        /// Majorのコード進行に書き換える
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
         private void Major_Click(object sender, RoutedEventArgs e)
         {
-            if (NowTonality == "minor")
+            if(NowTonality == "minor")
                 midiManager.TurnMajor(player.MusicTime, NowMode);
             NowTonality = "major";
         }
 
         /// <summary>
-        /// Minorダイアトニックに書き換える
+        /// Minorのコード進行に書き換える
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
@@ -739,3 +758,9 @@ namespace EnsembleCommander
         }
     }
 }
+
+
+/* memo
+ * NowTonarityをMidiManagerクラスのほうで定義して、for文の中で判定
+ * 曲停止時に初期化したい
+ */
