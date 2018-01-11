@@ -80,7 +80,8 @@ namespace EnsembleCommander
                                     Brushes.LightBlue,
                                     Brushes.Blue,
                                     Brushes.Navy,
-                                    Brushes.Purple };
+                                    Brushes.Purple
+        };
         Color[] colors = new Color[]{Colors.Red,
                                     Colors.OrangeRed,
                                     Colors.Orange,
@@ -90,7 +91,8 @@ namespace EnsembleCommander
                                     Colors.LightBlue,
                                     Colors.Blue,
                                     Colors.Navy,
-                                    Colors.Purple };
+                                    Colors.Purple
+        };
 
         //Mainイベント-------------------------------------------------------------------
 
