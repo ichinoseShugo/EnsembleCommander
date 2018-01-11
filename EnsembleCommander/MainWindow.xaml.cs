@@ -457,11 +457,7 @@ namespace EnsembleCommander
                     1.0d,
                     myBrush);
             }
-            //モードアイコンの表示
-            for (int mode = 0; mode < midiManager.ModeList.Length; mode++)
-            {
-                AddEllipse(new Point(50 + 50 * mode, 50), 50, brushes[mode], 1);
-            }
+           
             //フレームを解放する
             senseManager.ReleaseFrame();
         }
@@ -566,42 +562,9 @@ namespace EnsembleCommander
                     }
                 }
             }
-            //モードアイコンとの当たり判定
-            for (int mode = 0; mode < midiManager.ModeList.Length; mode++)
-            {
-                int hitCenter = 50 + 50 * mode;
-                if ((hitCenter - 25 < colorPoint[0].x && colorPoint[0].x < hitCenter + 25)
-                    && (25 < colorPoint[0].y && colorPoint[0].y < 75))
-                {
-                    Dispatcher.BeginInvoke(
-                            new Action(() =>
-                            {
-                                Console.WriteLine(mode);
-                                switch (mode)
-                                {
-                                    case MODE_WHOLE:
-                                        OnWholeTone.IsChecked = true;
-                                        break;
-                                    case MODE_ARPEGGIO:
-                                        OnArpeggio.IsChecked = true;
-                                        break;
-                                    case MODE_QUARTER:
-                                        OnQuarterTone.IsChecked = true;
-                                        break;
-                                    case MODE_DELAY:
-                                        OnDelay.IsChecked = true;
-                                        break;
-                                    case MODE_FREE:
-                                        OnFree.IsChecked = true;
-                                        break;
-                                    default:
-                                        break;
-                                }
-                            }
-                            ));
-                    break;
-                }
-            }
+
+            HitCheck(colorPoint[0]);
+
             AddEllipse(new Point(colorPoint[0].x, colorPoint[0].y), 5, Brushes.White, 1);
 
             return true;
@@ -662,6 +625,43 @@ namespace EnsembleCommander
             };
             Canvas.SetTop(rect, y);
             CanvasFaceParts.Children.Add(rect);
+        }
+
+        private void HitCheck(PXCMPointF32 p)
+        {
+            if (p.y < 10 || p.y > 60) return;
+            for (int mode = 0; mode < 5; mode++)
+            {
+                if (10 + 100 * mode < p.x && p.x < 110 + 100 * mode)
+                {
+                    Dispatcher.BeginInvoke(
+                            new Action(() =>
+                            {
+                                switch (mode)
+                                {
+                                    case MODE_WHOLE:
+                                        OnWholeTone.IsChecked = true;
+                                        break;
+                                    case MODE_QUARTER:
+                                        OnQuarterTone.IsChecked = true;
+                                        break;
+                                    case MODE_ARPEGGIO:
+                                        OnArpeggio.IsChecked = true;
+                                        break;
+                                    case MODE_DELAY:
+                                        OnDelay.IsChecked = true;
+                                        break;
+                                    case MODE_FREE:
+                                        OnFree.IsChecked = true;
+                                        break;
+                                    default:
+                                        break;
+                                }
+                            }
+                            ));
+                    break;
+                }
+            }
         }
 
         /// <summary>
