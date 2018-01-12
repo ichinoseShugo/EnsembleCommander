@@ -40,30 +40,30 @@
             <Grid>
                 <Image Name="imageColor" Width="960" Height="540"/>
                 <Canvas x:Name="CanvasFaceParts"/>
-                <StackPanel Orientation="Horizontal" VerticalAlignment="Top">
-                    <Rectangle Name="IconWholeTone" Width="100" Height="50" Margin="10,10,5,10">
+                <StackPanel VerticalAlignment="Top" HorizontalAlignment="Left" >
+                    <Rectangle Name="IconWholeTone" Width="216" Height="108">
                         <Rectangle.Fill>
-                            <ImageBrush ImageSource="Resources/WholeTone.png" Stretch="Fill"/>
+                            <ImageBrush ImageSource="Resources/BarIcons/Whole.png" Stretch="Fill"/>
                         </Rectangle.Fill>
                     </Rectangle>
-                    <Rectangle Name="IconQuarterTone" Width="100" Height="50"  Margin="5,10,5,10">
+                    <Rectangle Name="IconQuarterTone" Width="216" Height="108">
                         <Rectangle.Fill>
-                            <ImageBrush ImageSource="Resources/QuarterTone.png" Stretch="Fill"/>
+                            <ImageBrush ImageSource="Resources/BarIcons/Quarter.png" Stretch="Fill"/>
                         </Rectangle.Fill>
                     </Rectangle>
-                    <Rectangle Name="IconArpeggio" Width="100" Height="50"  Margin="5,10,5,10">
+                    <Rectangle Name="IconArpeggio" Width="216" Height="108">
                         <Rectangle.Fill>
-                            <ImageBrush ImageSource="Resources/Arpeggio.png" Stretch="Fill"/>
+                            <ImageBrush ImageSource="Resources/BarIcons/Arpeggio.png" Stretch="Fill"/>
                         </Rectangle.Fill>
                     </Rectangle>
-                    <Rectangle Name="IconDelay" Width="100" Height="50"  Margin="5,10,5,10">
+                    <Rectangle Name="IconDelay" Width="216" Height="108">
                         <Rectangle.Fill>
-                            <ImageBrush ImageSource="Resources/Delay.png" Stretch="Fill"/>
+                            <ImageBrush ImageSource="Resources/BarIcons/Delay.png" Stretch="Fill"/>
                         </Rectangle.Fill>
                     </Rectangle>
-                    <Rectangle Name="IconFree" Width="100" Height="50"  Margin="5,10,5,10">
+                    <Rectangle Name="IconFree" Width="216" Height="108">
                         <Rectangle.Fill>
-                            <ImageBrush ImageSource="Resources/Free.png" Stretch="Fill"/>
+                            <ImageBrush ImageSource="Resources/BarIcons/Free.png" Stretch="Fill"/>
                         </Rectangle.Fill>
                     </Rectangle>
                 </StackPanel>

@@ -4,17 +4,7 @@ using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
-using System.Collections.Generic;
-
-using NextMidi.Data;
-using NextMidi.Data.Domain;
-using NextMidi.Data.Track;
-using NextMidi.DataElement;
-using NextMidi.Filing.Midi;
-using NextMidi.MidiPort.Output;
 using NextMidi.Time;
-using System.Threading.Tasks;
-using System.Text.RegularExpressions;
 
 namespace EnsembleCommander
 {
@@ -448,7 +438,7 @@ namespace EnsembleCommander
             for (int k = 0; k < 5; k++)
             {
                 SolidColorBrush myBrush = new SolidColorBrush(colors[k]);
-                myBrush.Opacity = 0.25;
+                myBrush.Opacity = 0.50;
                 AddRectangle(
                     imageColor.Height / 5 * k,
                     imageColor.Height / 5,
@@ -517,7 +507,6 @@ namespace EnsembleCommander
                 {
                     continue;
                 }
-
                 GetFingerData(hand, PXCMHandData.JointType.JOINT_MIDDLE_TIP);
             }
         }
@@ -546,6 +535,7 @@ namespace EnsembleCommander
             projection.MapDepthToColor(depthPoint, colorPoint);
 
             //演奏領域の当たり判定
+            if (hand.QueryBodySide() == PXCMHandData.BodySideType.BODY_SIDE_LEFT)
             for (int i = 0; i < 5; i++)
             {
                 if ((imageColor.Height / 5) * i <= colorPoint[0].y && colorPoint[0].y < (imageColor.Height / 5) * (i + 1))
@@ -563,7 +553,8 @@ namespace EnsembleCommander
                 }
             }
 
-            HitCheck(colorPoint[0]);
+            if (hand.QueryBodySide() == PXCMHandData.BodySideType.BODY_SIDE_RIGHT)
+                HitCheck(colorPoint[0]);
 
             AddEllipse(new Point(colorPoint[0].x, colorPoint[0].y), 5, Brushes.White, 1);
 
@@ -629,10 +620,10 @@ namespace EnsembleCommander
 
         private void HitCheck(PXCMPointF32 p)
         {
-            if (p.y < 10 || p.y > 60) return;
+            if (p.x < 0 || p.x > (imageColor.Width/5)*2) return;
             for (int mode = 0; mode < 5; mode++)
             {
-                if (10 + 100 * mode < p.x && p.x < 110 + 100 * mode)
+                if ((imageColor.Height/5) * mode < p.y && p.y < (imageColor.Height / 5) * (mode+1))
                 {
                     Dispatcher.BeginInvoke(
                             new Action(() =>
