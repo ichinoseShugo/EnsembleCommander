@@ -139,9 +139,27 @@ namespace EnsembleCommander
         /// <param name="data"></param>
         void OnFiredGesture(PXCMHandData.GestureData data)
         {
-            if (data.name.CompareTo("thumb_up") == 0)
+            if (data.name.CompareTo("v_sign")==0)
             {
                 PlayMIDI();
+            }
+            if (data.name.CompareTo("thumb_up") == 0)
+            {
+                Dispatcher.BeginInvoke(
+            new Action(() =>
+            {
+                Major.IsChecked = true;
+            }
+            ));
+            }
+            if (data.name.CompareTo("thumb_down") == 0)
+            {
+                Dispatcher.BeginInvoke(
+                            new Action(() =>
+                            {
+                                Minor.IsChecked = true;
+                            }
+                            ));
             }
             if (data.name.CompareTo("fist") == 0)
             {
@@ -425,7 +443,9 @@ namespace EnsembleCommander
             // 手の検出の設定
             var config = handAnalyzer.CreateActiveConfiguration();
             config.EnableSegmentationImage(true);
+            config.EnableGesture("v_sign");
             config.EnableGesture("thumb_up");
+            config.EnableGesture("thumb_down");
             config.EnableGesture("tap");
             config.EnableGesture("fist");
             config.SubscribeGesture(OnFiredGesture);

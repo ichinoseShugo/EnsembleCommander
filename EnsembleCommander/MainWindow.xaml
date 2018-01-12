@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:EnsembleCommander"
         mc:Ignorable="d"
-        Title="MainWindow" Height="720" Width="1000" Loaded="Window_Loaded" Unloaded="Window_Unloaded">
+        Title="MainWindow" Height="720" Width="1050" Loaded="Window_Loaded" Unloaded="Window_Unloaded">
     <StackPanel>
         <StackPanel Orientation="Horizontal">
             <StackPanel>
@@ -34,6 +34,7 @@
                 <Border BorderThickness="1" BorderBrush="#FF00A1FF" />
                 <Line Name="CurrentLine" StrokeThickness="5" X1="0" Y1="0" X2="0" Y2="100" Stroke="#FF3062E8" />
             </Grid>
+            <Image Name="LectureTonality" Width="200" Height="120" Source="Resources/Lectures/SetTonality.png"/>
         </StackPanel>
         <StackPanel Orientation="Horizontal">
             <ListBox Name="PivotList" Width="40" SelectionChanged="PivotList_SelectionChanged"/>
@@ -41,29 +42,29 @@
                 <Image Name="imageColor" Width="960" Height="540"/>
                 <Canvas x:Name="CanvasFaceParts"/>
                 <StackPanel VerticalAlignment="Top" HorizontalAlignment="Left" >
-                    <Rectangle Name="IconWholeTone" Width="216" Height="108">
+                    <Rectangle Name="IconWholeTone" Width="206" Height="98" Margin="5">
                         <Rectangle.Fill>
-                            <ImageBrush ImageSource="Resources/BarIcons/Whole.png" Stretch="Fill"/>
+                            <ImageBrush ImageSource="Resources/OtamaIcons/Whole.png" Stretch="Fill"/>
                         </Rectangle.Fill>
                     </Rectangle>
-                    <Rectangle Name="IconQuarterTone" Width="216" Height="108">
+                    <Rectangle Name="IconQuarterTone" Width="206" Height="98" Margin="5">
                         <Rectangle.Fill>
-                            <ImageBrush ImageSource="Resources/BarIcons/Quarter.png" Stretch="Fill"/>
+                            <ImageBrush ImageSource="Resources/OtamaIcons/Quarter.png" Stretch="Fill"/>
                         </Rectangle.Fill>
                     </Rectangle>
-                    <Rectangle Name="IconArpeggio" Width="216" Height="108">
+                    <Rectangle Name="IconArpeggio" Width="206" Height="98" Margin="5">
                         <Rectangle.Fill>
-                            <ImageBrush ImageSource="Resources/BarIcons/Arpeggio.png" Stretch="Fill"/>
+                            <ImageBrush ImageSource="Resources/OtamaIcons/Arpeggio.png" Stretch="Fill"/>
                         </Rectangle.Fill>
                     </Rectangle>
-                    <Rectangle Name="IconDelay" Width="216" Height="108">
+                    <Rectangle Name="IconDelay" Width="206" Height="98" Margin="5">
                         <Rectangle.Fill>
-                            <ImageBrush ImageSource="Resources/BarIcons/Delay.png" Stretch="Fill"/>
+                            <ImageBrush ImageSource="Resources/OtamaIcons/Delay.png" Stretch="Fill"/>
                         </Rectangle.Fill>
                     </Rectangle>
-                    <Rectangle Name="IconFree" Width="216" Height="108">
+                    <Rectangle Name="IconFree" Width="206" Height="98" Margin="5">
                         <Rectangle.Fill>
-                            <ImageBrush ImageSource="Resources/BarIcons/Free.png" Stretch="Fill"/>
+                            <ImageBrush ImageSource="Resources/OtamaIcons/Free.png" Stretch="Fill"/>
                         </Rectangle.Fill>
                     </Rectangle>
                 </StackPanel>
