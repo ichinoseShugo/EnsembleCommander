@@ -4,17 +4,7 @@ using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
-using System.Collections.Generic;
-
-using NextMidi.Data;
-using NextMidi.Data.Domain;
-using NextMidi.Data.Track;
-using NextMidi.DataElement;
-using NextMidi.Filing.Midi;
-using NextMidi.MidiPort.Output;
 using NextMidi.Time;
-using System.Threading.Tasks;
-using System.Text.RegularExpressions;
 
 namespace EnsembleCommander
 {
@@ -467,7 +457,7 @@ namespace EnsembleCommander
             for (int k = 0; k < 5; k++)
             {
                 SolidColorBrush myBrush = new SolidColorBrush(colors[k]);
-                myBrush.Opacity = 0.25;
+                myBrush.Opacity = 0.50;
                 AddRectangle(
                     imageColor.Height / 5 * k,
                     imageColor.Height / 5,
@@ -476,11 +466,7 @@ namespace EnsembleCommander
                     1.0d,
                     myBrush);
             }
-            //モードアイコンの表示
-            for (int mode = 0; mode < midiManager.ModeList.Length; mode++)
-            {
-                AddEllipse(new Point(50 + 50 * mode, 50), 50, brushes[mode], 1);
-            }
+           
             //フレームを解放する
             senseManager.ReleaseFrame();
         }
@@ -540,7 +526,6 @@ namespace EnsembleCommander
                 {
                     continue;
                 }
-
                 GetFingerData(hand, PXCMHandData.JointType.JOINT_MIDDLE_TIP);
             }
         }
@@ -569,6 +554,7 @@ namespace EnsembleCommander
             projection.MapDepthToColor(depthPoint, colorPoint);
 
             //演奏領域の当たり判定
+            if (hand.QueryBodySide() == PXCMHandData.BodySideType.BODY_SIDE_LEFT)
             for (int i = 0; i < 5; i++)
             {
                 if ((imageColor.Height / 5) * i <= colorPoint[0].y && colorPoint[0].y < (imageColor.Height / 5) * (i + 1))
@@ -585,42 +571,10 @@ namespace EnsembleCommander
                     }
                 }
             }
-            //モードアイコンとの当たり判定
-            for (int mode = 0; mode < midiManager.ModeList.Length; mode++)
-            {
-                int hitCenter = 50 + 50 * mode;
-                if ((hitCenter - 25 < colorPoint[0].x && colorPoint[0].x < hitCenter + 25)
-                    && (25 < colorPoint[0].y && colorPoint[0].y < 75))
-                {
-                    Dispatcher.BeginInvoke(
-                            new Action(() =>
-                            {
-                                Console.WriteLine(mode);
-                                switch (mode)
-                                {
-                                    case MODE_WHOLE:
-                                        OnWholeTone.IsChecked = true;
-                                        break;
-                                    case MODE_ARPEGGIO:
-                                        OnArpeggio.IsChecked = true;
-                                        break;
-                                    case MODE_QUARTER:
-                                        OnQuarterTone.IsChecked = true;
-                                        break;
-                                    case MODE_DELAY:
-                                        OnDelay.IsChecked = true;
-                                        break;
-                                    case MODE_FREE:
-                                        OnFree.IsChecked = true;
-                                        break;
-                                    default:
-                                        break;
-                                }
-                            }
-                            ));
-                    break;
-                }
-            }
+
+            if (hand.QueryBodySide() == PXCMHandData.BodySideType.BODY_SIDE_RIGHT)
+                HitCheck(colorPoint[0]);
+
             AddEllipse(new Point(colorPoint[0].x, colorPoint[0].y), 5, Brushes.White, 1);
 
             return true;
@@ -681,6 +635,43 @@ namespace EnsembleCommander
             };
             Canvas.SetTop(rect, y);
             CanvasFaceParts.Children.Add(rect);
+        }
+
+        private void HitCheck(PXCMPointF32 p)
+        {
+            if (p.x < 0 || p.x > (imageColor.Width/5)*2) return;
+            for (int mode = 0; mode < 5; mode++)
+            {
+                if ((imageColor.Height/5) * mode < p.y && p.y < (imageColor.Height / 5) * (mode+1))
+                {
+                    Dispatcher.BeginInvoke(
+                            new Action(() =>
+                            {
+                                switch (mode)
+                                {
+                                    case MODE_WHOLE:
+                                        OnWholeTone.IsChecked = true;
+                                        break;
+                                    case MODE_QUARTER:
+                                        OnQuarterTone.IsChecked = true;
+                                        break;
+                                    case MODE_ARPEGGIO:
+                                        OnArpeggio.IsChecked = true;
+                                        break;
+                                    case MODE_DELAY:
+                                        OnDelay.IsChecked = true;
+                                        break;
+                                    case MODE_FREE:
+                                        OnFree.IsChecked = true;
+                                        break;
+                                    default:
+                                        break;
+                                }
+                            }
+                            ));
+                    break;
+                }
+            }
         }
 
         /// <summary>
