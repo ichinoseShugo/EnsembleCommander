@@ -46,7 +46,10 @@ namespace EnsembleCommander
             "DELAY",
             "FREE"
         };
-        public string[] inputedChord = { "C", "Am", "F", "G", "Em", "F", "G", "C" }; //背景楽曲のコード進行配列
+
+        //public string[] inputedChord = { "C", "Am", "F", "G", "Em", "F", "G", "C" }; //背景楽曲のコード進行配列
+        public string[] inputedChord = { "C", "Am", "F", "G", "Em", "F", "G", "C", "C", "Am", "F", "G", "Em", "F", "G", "C" }; //背景楽曲のコード進行配列
+        //public string[] inputedChord = { "C", "Em", "F", "G", "Em", "Am", "Dm", "G", "Am", "Em", "F", "Em", "Dm", "C", "G", "C" }; //背景楽曲のコード進行配列 
         //public string[] inputedChord = { "C", "G", "Am", "Em", "F", "C", "F", "G" }; //背景楽曲のコード進行配列 
         //public string[] inputedChord = { "D", "A", "Bm", "F#m", "G", "D", "G", "A" }; //背景楽曲のコード進行配列 
         //public string[] inputedChord = { "F", "Fm", "Em", "A7" }; //白松研においでよ
@@ -288,36 +291,41 @@ namespace EnsembleCommander
         /// </summary>
         public void TurnMajor(MusicTime time, int mode)
         {
-            // 以降のコードをメジャーに書き換える
-            for (int measure = time.Measure; measure < chordProgList[mode].Count; measure++)
+
+            for (int i = 0; i < 5; i++)
             {
-                if (chordProgList[mode][measure].NoteList[0].Note % 12 == KeyNoteNumber % 12) //1
+                // 以降のコードをメジャーに書き換える
+                for (int measure = time.Measure; measure < chordProgList[mode].Count; measure++)
                 {
-                    chordProgList[mode][measure].NoteList[1].Note += 1;
-                }
-                else if (chordProgList[mode][measure].NoteList[0].Note % 12 == KeyNoteNumber % 12 + 2) //2
-                {
-                    chordProgList[mode][measure].NoteList[2].Note += 1;
-                }
-                else if (chordProgList[mode][measure].NoteList[0].Note % 12 == KeyNoteNumber % 12 + 4) //3
-                {
-                }
-                else if (chordProgList[mode][measure].NoteList[0].Note % 12 == KeyNoteNumber % 12 + 5) //4
+                    if (chordProgList[mode][measure].NoteList[0].Note % 12 == KeyNoteNumber % 12) //1
+                    {
+                        chordProgList[mode][measure].NoteList[1 + (3 * i)].Note += 1;
 
-                {
-                    chordProgList[mode][measure].NoteList[1].Note += 1;
+                    }
+                    else if (chordProgList[mode][measure].NoteList[0].Note % 12 == KeyNoteNumber % 12 + 2) //2
+                    {
+                        chordProgList[mode][measure].NoteList[2 + (3 * i)].Note += 1;
+                    }
+                    else if (chordProgList[mode][measure].NoteList[0].Note % 12 == KeyNoteNumber % 12 + 4) //3
+                    {
+                    }
+                    else if (chordProgList[mode][measure].NoteList[0].Note % 12 == KeyNoteNumber % 12 + 5) //4
+                    {
+                        chordProgList[mode][measure].NoteList[1 + (3 * i)].Note += 1;
+                    }
+                    else if (chordProgList[mode][measure].NoteList[0].Note % 12 == KeyNoteNumber % 12 + 7) //5
+                    {
+                    }
+                    else if (chordProgList[mode][measure].NoteList[0].Note % 12 == KeyNoteNumber % 12 + 9) //6
+                    {
+                        chordProgList[mode][measure].NoteList[2 + (3 * i)].Note += 1;
+                    }
+                    else if (chordProgList[mode][measure].NoteList[0].Note % 12 == KeyNoteNumber % 12 + 11) //7
+                    {
+                    }
                 }
-                else if (chordProgList[mode][measure].NoteList[0].Note % 12 == KeyNoteNumber % 12 + 7) //5
-                {
-                }
-                else if (chordProgList[mode][measure].NoteList[0].Note % 12 == KeyNoteNumber % 12 + 9) //6
-                {
-                    chordProgList[mode][measure].NoteList[2].Note += 1;
-                }
-                else if (chordProgList[mode][measure].NoteList[0].Note % 12 == KeyNoteNumber % 12 + 11) //7
-                {
-                }
-
+                if (mode == 0 || mode == 2 || mode == 4) break; //Whole, Arpeggio, Free なら1ループで抜け出す．
+                if (mode == 1 && i == 3) break; //Quarterは4回音が鳴るので，4ループで抜け出す．
             }
         }
 
@@ -326,36 +334,43 @@ namespace EnsembleCommander
         /// </summary>
         public void TurnMinor(MusicTime time, int mode)
         {
-            // 以降のコードをマイナーに書き換える
-            for (int measure = time.Measure; measure < chordProgList[mode].Count; measure++)
-            {
-                if (chordProgList[mode][measure].NoteList[0].Note % 12 == KeyNoteNumber % 12) //1
-                {
-                    chordProgList[mode][measure].NoteList[1].Note -= 1;
-                }
-                else if (chordProgList[mode][measure].NoteList[0].Note % 12 == KeyNoteNumber % 12 + 2) //2
-                {
-                    chordProgList[mode][measure].NoteList[2].Note -= 1;
-                }
-                else if (chordProgList[mode][measure].NoteList[0].Note % 12 == KeyNoteNumber % 12 + 4) //3
-                {
-                }
-                else if (chordProgList[mode][measure].NoteList[0].Note % 12 == KeyNoteNumber % 12 + 5) //4
-                {
-                    chordProgList[mode][measure].NoteList[1].Note -= 1;
-                }
-                else if (chordProgList[mode][measure].NoteList[0].Note % 12 == KeyNoteNumber % 12 + 7) //5
-                {
-                }
-                else if (chordProgList[mode][measure].NoteList[0].Note % 12 == KeyNoteNumber % 12 + 9) //6
-                { 
-                    chordProgList[mode][measure].NoteList[2].Note -= 1;
-                }
-                else if (chordProgList[mode][measure].NoteList[0].Note % 12 == KeyNoteNumber % 12 + 11) //7
-                {
-                }
 
+            for (int i = 0; i < 5; i++) // 1小節内で複数回の音を鳴らす場合があるためループ(最大がDelayモードの5回)
+            {
+                // 以降のコードをマイナーに書き換える
+                for (int measure = time.Measure; measure < chordProgList[mode].Count; measure++)
+                {
+                    if (chordProgList[mode][measure].NoteList[0].Note % 12 == KeyNoteNumber % 12) //1→1m
+                    {
+                        chordProgList[mode][measure].NoteList[1 + (3 * i)].Note -= 1;
+
+                    }
+                    else if (chordProgList[mode][measure].NoteList[0].Note % 12 == KeyNoteNumber % 12 + 2) //2m→2m(-5)
+                    {
+                        chordProgList[mode][measure].NoteList[2 + (3 * i)].Note -= 1;
+                    }
+                    else if (chordProgList[mode][measure].NoteList[0].Note % 12 == KeyNoteNumber % 12 + 4) //3m→3m
+                    {
+                    }
+                    else if (chordProgList[mode][measure].NoteList[0].Note % 12 == KeyNoteNumber % 12 + 5) //4→4m
+                    {
+                        chordProgList[mode][measure].NoteList[1 + (3 * i)].Note -= 1;
+                    }
+                    else if (chordProgList[mode][measure].NoteList[0].Note % 12 == KeyNoteNumber % 12 + 7) //5→5
+                    {
+                    }
+                    else if (chordProgList[mode][measure].NoteList[0].Note % 12 == KeyNoteNumber % 12 + 9) //6m→6m(-5)
+                    {
+                        chordProgList[mode][measure].NoteList[2 + (3 * i)].Note -= 1;
+                    }
+                    else if (chordProgList[mode][measure].NoteList[0].Note % 12 == KeyNoteNumber % 12 + 11) //7m(-5)→7m(-5)
+                    {
+                    }
+                }
+                if (mode == 0 || mode == 2 || mode == 4) break; //Whole, Arpeggio, Free なら1ループで抜け出す．
+                if (mode == 1 && i == 3) break; //Quarterは4回音が鳴るので，4ループで抜け出す．
             }
+
         }
 
     }

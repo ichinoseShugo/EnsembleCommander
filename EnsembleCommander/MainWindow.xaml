@@ -21,8 +21,8 @@
                     <RadioButton x:Name="OnFree" Content="Free" Margin="5" Checked="OnFree_Checked"/>
                 </StackPanel>
                 <StackPanel Orientation="Horizontal">
-                    <RadioButton x:Name="Major" IsChecked="true" Content="Major" Margin="5" Click="Major_Click"/>
-                    <RadioButton x:Name="Minor" Content="Minor" Margin="5" Click="Minor_Click"/>
+                    <RadioButton x:Name="Major" IsChecked="true" Content="Major" Margin="5" Checked="Major_Checked"/>
+                    <RadioButton x:Name="Minor" Content="Minor" Margin="5" Checked="Minor_Checked"/>
                 </StackPanel>
                 <Button Name="OnNote" Content="Tap" Click="OnNote_Click"/>
                 <StackPanel Orientation="Horizontal">
@@ -44,27 +44,27 @@
                 <StackPanel VerticalAlignment="Top" HorizontalAlignment="Left" >
                     <Rectangle Name="IconWholeTone" Width="206" Height="98" Margin="5">
                         <Rectangle.Fill>
-                            <ImageBrush ImageSource="Resources/OtamaIcons/Whole.png" Stretch="Fill"/>
+                            <ImageBrush ImageSource="Resources/ColorBarIcons/Whole.png" Stretch="Fill"/>
                         </Rectangle.Fill>
                     </Rectangle>
                     <Rectangle Name="IconQuarterTone" Width="206" Height="98" Margin="5">
                         <Rectangle.Fill>
-                            <ImageBrush ImageSource="Resources/OtamaIcons/Quarter.png" Stretch="Fill"/>
+                            <ImageBrush ImageSource="Resources/ColorBarIcons/Quarter.png" Stretch="Fill"/>
                         </Rectangle.Fill>
                     </Rectangle>
                     <Rectangle Name="IconArpeggio" Width="206" Height="98" Margin="5">
                         <Rectangle.Fill>
-                            <ImageBrush ImageSource="Resources/OtamaIcons/Arpeggio.png" Stretch="Fill"/>
+                            <ImageBrush ImageSource="Resources/ColorBarIcons/Arpeggio.png" Stretch="Fill"/>
                         </Rectangle.Fill>
                     </Rectangle>
                     <Rectangle Name="IconDelay" Width="206" Height="98" Margin="5">
                         <Rectangle.Fill>
-                            <ImageBrush ImageSource="Resources/OtamaIcons/Delay.png" Stretch="Fill"/>
+                            <ImageBrush ImageSource="Resources/ColorBarIcons/Delay.png" Stretch="Fill"/>
                         </Rectangle.Fill>
                     </Rectangle>
                     <Rectangle Name="IconFree" Width="206" Height="98" Margin="5">
                         <Rectangle.Fill>
-                            <ImageBrush ImageSource="Resources/OtamaIcons/Free.png" Stretch="Fill"/>
+                            <ImageBrush ImageSource="Resources/ColorBarIcons/Free.png" Stretch="Fill"/>
                         </Rectangle.Fill>
                     </Rectangle>
                 </StackPanel>

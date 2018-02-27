@@ -184,6 +184,11 @@
     <Content Include="libpxccpp2c.dll">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <Resource Include="Resources\ColorBarIcons\Arpeggio.png" />
+    <Resource Include="Resources\ColorBarIcons\Delay.png" />
+    <Resource Include="Resources\ColorBarIcons\Free.png" />
+    <Resource Include="Resources\ColorBarIcons\Quarter.png" />
+    <Resource Include="Resources\ColorBarIcons\Whole.png" />
     <Resource Include="Resources\Lectures\SetTonality.png" />
     <Resource Include="Resources\OtamaIcons\Arpeggio.png" />
     <Resource Include="Resources\OtamaIcons\Delay.png" />

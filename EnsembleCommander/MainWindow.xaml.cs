@@ -210,9 +210,9 @@ namespace EnsembleCommander
             foreach (var chord in midiManager.chordProgList[MODE_WHOLE])
             {
                 chord.SetNotes(MODE_WHOLE);
-                Console.WriteLine("MODE_WHOLE[0]:" + midiManager.chordProgList[MODE_WHOLE][i].NoteList[0].Note);
-                Console.WriteLine("MODE_WHOLE[1]:" + midiManager.chordProgList[MODE_WHOLE][i].NoteList[1].Note);
-                Console.WriteLine("MODE_WHOLE[2]:" + midiManager.chordProgList[MODE_WHOLE][i].NoteList[2].Note);
+                //Console.WriteLine("MODE_WHOLE[0]:" + midiManager.chordProgList[MODE_WHOLE][i].NoteList[0].Note);
+                //Console.WriteLine("MODE_WHOLE[1]:" + midiManager.chordProgList[MODE_WHOLE][i].NoteList[1].Note);
+                //Console.WriteLine("MODE_WHOLE[2]:" + midiManager.chordProgList[MODE_WHOLE][i].NoteList[2].Note);
                 i++;
             }
             foreach (var chord in midiManager.chordProgList[MODE_QUARTER]) chord.SetNotes(MODE_QUARTER);
@@ -318,10 +318,20 @@ namespace EnsembleCommander
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        private void Major_Click(object sender, RoutedEventArgs e)
+        private void Major_Checked(object sender, RoutedEventArgs e)
         {
-            if(NowTonality == "minor")
-                midiManager.TurnMajor(player.MusicTime, NowMode);
+            //System.Console.WriteLine("sender:" + sender);
+            //System.Console.WriteLine("e:" + e);
+            System.Console.WriteLine("major");
+            if (NowTonality == "minor")
+            {
+                //midiManager.TurnMajor(player.MusicTime, NowMode);
+                // 全てのモードに対してMajorに書き換える．
+                for (int i = 0; i < 5; i++)
+                {
+                    midiManager.TurnMajor(player.MusicTime, i);
+                }
+            }
             NowTonality = "major";
         }
 
@@ -330,10 +340,20 @@ namespace EnsembleCommander
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        private void Minor_Click(object sender, RoutedEventArgs e)
+        private void Minor_Checked(object sender, RoutedEventArgs e)
         {
+            //System.Console.WriteLine("sender:" + sender);
+            //System.Console.WriteLine("e:" + e);
+            System.Console.WriteLine("minor");
             if (NowTonality == "major")
-                midiManager.TurnMinor(player.MusicTime, NowMode);
+            {
+                //midiManager.TurnMinor(player.MusicTime, NowMode);
+                // 全てのモードに対してMinorに書き換える．
+                for(int i = 0; i < 5; i++)
+                {
+                    midiManager.TurnMinor(player.MusicTime, i);
+                }
+            }
             NowTonality = "minor";
         }
 
@@ -447,7 +467,7 @@ namespace EnsembleCommander
             config.EnableGesture("thumb_up");
             config.EnableGesture("thumb_down");
             config.EnableGesture("tap");
-            config.EnableGesture("fist");
+            //config.EnableGesture("fist");
             config.SubscribeGesture(OnFiredGesture);
             config.ApplyChanges();
             config.Update();
@@ -564,7 +584,6 @@ namespace EnsembleCommander
             {
                 return false;
             }
-
             // Depth座標系をカラー座標系に変換する
             var depthPoint = new PXCMPoint3DF32[1];
             var colorPoint = new PXCMPointF32[1];
@@ -572,8 +591,19 @@ namespace EnsembleCommander
             depthPoint[0].y = jointData.positionImage.y;
             depthPoint[0].z = jointData.positionWorld.z * 1000;
             projection.MapDepthToColor(depthPoint, colorPoint);
+            
+            var masp = hand.QueryMassCenterImage();
+            var mdp = new PXCMPoint3DF32[1];
+            var mcp = new PXCMPointF32[1];
+            mdp[0].x = masp.x;
+            mdp[0].y = masp.y;
+            mdp[0].z = hand.QueryMassCenterWorld().z * 1000;
+            projection.MapDepthToColor(mdp, mcp);
+            //Console.WriteLine(mcp[0].x);
+            AddEllipse(new Point(mcp[0].x, mcp[0].y), 10, Brushes.Red, 1);
+            colorPoint = mcp;
 
-            //演奏領域の当たり判定
+            //ユーザの右手に対して演奏領域の当たり判定確認
             if (hand.QueryBodySide() == PXCMHandData.BodySideType.BODY_SIDE_LEFT)
             for (int i = 0; i < 5; i++)
             {
@@ -592,8 +622,9 @@ namespace EnsembleCommander
                 }
             }
 
+            //ユーザの左手に対してアイコンの当たり判定の確認
             if (hand.QueryBodySide() == PXCMHandData.BodySideType.BODY_SIDE_RIGHT)
-                HitCheck(colorPoint[0]);
+                IconHitCheck(colorPoint[0]);
 
             AddEllipse(new Point(colorPoint[0].x, colorPoint[0].y), 5, Brushes.White, 1);
 
@@ -657,9 +688,16 @@ namespace EnsembleCommander
             CanvasFaceParts.Children.Add(rect);
         }
 
-        private void HitCheck(PXCMPointF32 p)
+        /// <summary>
+        /// アイコンの当たり判定の確認
+        /// </summary>
+        /// <param name="p"></param>
+        private void IconHitCheck(PXCMPointF32 p)
         {
+            //Console.WriteLine((imageColor.Width / 5) * 2);
+            //x座標がアイコン領域外ならreturn
             if (p.x < 0 || p.x > (imageColor.Width/5)*2) return;
+
             for (int mode = 0; mode < 5; mode++)
             {
                 if ((imageColor.Height/5) * mode < p.y && p.y < (imageColor.Height / 5) * (mode+1))

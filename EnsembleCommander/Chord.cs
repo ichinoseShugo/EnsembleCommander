@@ -257,6 +257,9 @@ namespace EnsembleCommander
                         foreach (var element in Elements)
                         {
                             NoteEvent note = (NoteEvent)element.Clone();
+                            if (i == 0) note.Velocity = 85;
+                            if (i == 2) note.Velocity = 75;
+                            if (i == 1 || i == 3) note.Velocity = 70;
                             note.Gate = 240;
                             note.Tick += i * 240;
                             NoteList.Add(note);
