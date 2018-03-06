@@ -466,7 +466,7 @@ namespace EnsembleCommander
             config.EnableGesture("v_sign");
             config.EnableGesture("thumb_up");
             config.EnableGesture("thumb_down");
-            config.EnableGesture("tap");
+            //config.EnableGesture("tap");
             //config.EnableGesture("fist");
             config.SubscribeGesture(OnFiredGesture);
             config.ApplyChanges();
@@ -567,6 +567,7 @@ namespace EnsembleCommander
                     continue;
                 }
                 GetFingerData(hand, PXCMHandData.JointType.JOINT_MIDDLE_TIP);
+                DetectTap(hand);
             }
         }
 
@@ -629,6 +630,100 @@ namespace EnsembleCommander
             AddEllipse(new Point(colorPoint[0].x, colorPoint[0].y), 5, Brushes.White, 1);
 
             return true;
+        }
+        
+
+        
+        public PXCMPoint3DF32 RightCenter= new PXCMPoint3DF32();        //手のひら
+        public PXCMPoint3DF32 preRightCenter = new PXCMPoint3DF32();
+        public PXCMPoint3DF32 LeftCenter = new PXCMPoint3DF32();
+        public PXCMPoint3DF32 preLeftCenter = new PXCMPoint3DF32();
+        public PXCMPoint3DF32 RightMiddle = new PXCMPoint3DF32();       //中指の先
+        public PXCMPoint3DF32 preRightMiddle = new PXCMPoint3DF32();
+        public PXCMPoint3DF32 LeftMiddle = new PXCMPoint3DF32();
+        public PXCMPoint3DF32 preLeftMiddle = new PXCMPoint3DF32();
+
+        private void DetectTap(PXCMHandData.IHand hand)
+        {
+            PXCMHandData.JointData MiddleData;
+            PXCMHandData.JointData CenterData;
+
+            //指のデータをとってくる(depth)
+            //ユーザの右手のデータ
+            if (hand.QueryBodySide() == PXCMHandData.BodySideType.BODY_SIDE_LEFT)
+            {
+                hand.QueryTrackedJoint(PXCMHandData.JointType.JOINT_CENTER, out CenterData);
+                RightCenter = CenterData.positionWorld;
+                hand.QueryTrackedJoint(PXCMHandData.JointType.JOINT_MIDDLE_TIP, out MiddleData);
+                RightMiddle = MiddleData.positionWorld;
+                //RightCenter = hand.QueryMassCenterWorld();
+            }
+
+            //ユーザの左手のデータ
+            if (hand.QueryBodySide() == PXCMHandData.BodySideType.BODY_SIDE_RIGHT)
+            {
+                hand.QueryTrackedJoint(PXCMHandData.JointType.JOINT_CENTER, out CenterData);
+                LeftCenter = CenterData.positionWorld;
+                hand.QueryTrackedJoint(PXCMHandData.JointType.JOINT_MIDDLE_TIP, out MiddleData);
+                LeftMiddle = MiddleData.positionWorld;
+            }
+
+            //if文の条件を記述(前の指のデータと比較)
+            // ユーザの右手でタップ
+            if (-RightMiddle.z + preRightMiddle.z > 0.02                                                // 1F(約1/60秒)あたりの深度の変化が0.02m以上
+                && System.Math.Pow(System.Math.Pow(RightMiddle.x - preRightMiddle.x, 2)                 // 指先の速度が1.8m/s以上
+                                   + System.Math.Pow(RightMiddle.y - preRightMiddle.y, 2)
+                                   + System.Math.Pow(RightMiddle.z * 1000 - preRightMiddle.z * 1000, 2), 0.5) > 0.03
+                && System.Math.Pow(System.Math.Pow(RightCenter.x - preRightCenter.x, 2)                 // 手のひらの速度が0.6m/s以上
+                                   + System.Math.Pow(RightCenter.y - preRightCenter.y, 2)
+                                   + System.Math.Pow(RightCenter.z * 1000 - preRightCenter.z * 1000, 2), 0.5) > 0.01
+               )
+            {
+                //tap音を出力
+                midiManager.SetOnNote(player.MusicTime);
+            }
+
+            // ユーザの左手でタップ
+            if (-LeftMiddle.z + preLeftMiddle.z > 0.02                                                // 1F(約1/60秒)あたりの深度の変化が0.02m以上
+                && System.Math.Pow(System.Math.Pow(LeftMiddle.x - preLeftMiddle.x, 2)                 // 指先の速度が1.8m/s以上
+                                   + System.Math.Pow(RightMiddle.y - preLeftMiddle.y, 2)
+                                   + System.Math.Pow(RightMiddle.z - preLeftMiddle.z, 2), 0.5) > 0.03
+                && System.Math.Pow(System.Math.Pow(RightCenter.x - preLeftCenter.x, 2)                 // 手のひらの速度が0.6m/s以上
+                                   + System.Math.Pow(RightCenter.y - preLeftCenter.y, 2)
+                                   + System.Math.Pow(RightCenter.z - preLeftCenter.z, 2), 0.5) > 0.01
+                && System.Math.Pow(System.Math.Pow(RightCenter.x - preLeftCenter.x, 2)                 // 手のひらの速度が1.5m/s以下
+                                   + System.Math.Pow(RightCenter.y - preLeftCenter.y, 2)
+                                   + System.Math.Pow(RightCenter.z - preLeftCenter.z, 2), 0.5) < 0.025
+               )
+            {
+                //tap音を出力
+                midiManager.SetOnNote(player.MusicTime);
+            }
+
+            //Console.WriteLine("RightCenter.x:" + RightCenter.x);
+            //Console.WriteLine("preRightCenter.x:" + preRightCenter.x);
+
+            //Console.WriteLine();
+            //Console.WriteLine("RightMiddle.x:" + RightMiddle.x);
+            //Console.WriteLine("preRightMiddle.x:" + preRightMiddle.x);
+
+
+            //前の指のデータに今の指のデータを上書き
+            //plc,preLeftMiddle,preRightCenter,preRightMiddle
+            // 上手くいかなければディープコピーする．
+            preRightCenter.x = RightCenter.x;
+            preRightCenter.y = RightCenter.y;
+            preRightCenter.z = RightCenter.z;
+            preRightMiddle.x = RightMiddle.x;
+            preRightMiddle.y = RightMiddle.y;
+            preRightMiddle.z = RightMiddle.z;
+            preLeftCenter.x = LeftCenter.x;
+            preLeftCenter.y = LeftCenter.y;
+            preLeftCenter.z = LeftCenter.z;
+            preLeftMiddle.x = LeftMiddle.x;
+            preLeftMiddle.y = LeftMiddle.y;
+            preLeftMiddle.z = LeftMiddle.z;
+
         }
 
         /// <summary>
