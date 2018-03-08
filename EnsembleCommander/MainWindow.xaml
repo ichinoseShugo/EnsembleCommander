@@ -36,6 +36,7 @@
             </Grid>
             <Image Name="LectureTonality" Width="200" Height="120" Source="Resources/Lectures/SetTonality.png"/>
         </StackPanel>
+        <Label Name="jSpeed" Content="jspeed:"/>
         <StackPanel Orientation="Horizontal">
             <ListBox Name="PivotList" Width="40" SelectionChanged="PivotList_SelectionChanged"/>
             <Grid>

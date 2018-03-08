@@ -546,7 +546,10 @@ namespace EnsembleCommander
                 {
                     continue;
                 }
+
                 GetFingerData(hand, PXCMHandData.JointType.JOINT_MIDDLE_TIP);
+                if (hand.QueryBodySide() == PXCMHandData.BodySideType.BODY_SIDE_LEFT)
+                    GetTap(hand);
             }
         }
 
@@ -598,6 +601,32 @@ namespace EnsembleCommander
             AddEllipse(new Point(colorPoint[0].x, colorPoint[0].y), 5, Brushes.White, 1);
 
             return true;
+        }
+
+        private PXCMPoint3DF32 pm;
+        private PXCMPoint3DF32 pc;
+        private void GetTap(PXCMHandData.IHand hand)
+        {
+            PXCMHandData.JointData mid;
+            hand.QueryTrackedJoint(PXCMHandData.JointType.JOINT_MIDDLE_TIP, out mid);
+            PXCMHandData.JointData center;
+            hand.QueryTrackedJoint(PXCMHandData.JointType.JOINT_CENTER, out center);
+
+            var m = mid.positionWorld;
+            var c = center.positionWorld;
+            m.z *= 1000;
+            c.z *= 1000;
+            var mDistance = pm.z - m.z;
+            var mSpeed = Math.Pow(Math.Pow(m.x - pm.x, 2) + Math.Pow(m.y - pm.y, 2) + Math.Pow(m.z - pm.z, 2), 0.5);
+            var cSpeed = Math.Pow(Math.Pow(c.x - pc.x, 2) + Math.Pow(c.y - pc.y, 2) + Math.Pow(c.z - pc.z, 2), 0.5);
+            if (mDistance > 20 && mSpeed > 30 && 10 < cSpeed && cSpeed < 25)
+            {
+                jSpeed.Content = m.z + "," + pm.z + "," + mDistance;
+                //midiManager.SetOnNote(player.MusicTime);
+            }
+
+            pm = m;
+            pc = c;
         }
 
         /// <summary>
