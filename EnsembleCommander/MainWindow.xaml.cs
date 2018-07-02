@@ -53,7 +53,7 @@ namespace EnsembleCommander
 
         PXCMHandModule handAnalyzer;
         PXCMHandData handData;
-
+        
         const int COLOR_WIDTH = 960;
         const int COLOR_HEIGHT = 540;
         const int COLOR_FPS = 30;
