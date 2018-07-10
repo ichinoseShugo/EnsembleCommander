@@ -5,8 +5,9 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:EnsembleCommander"
         mc:Ignorable="d"
-        Title="MainWindow" Height="720" Width="1050" Loaded="Window_Loaded" Unloaded="Window_Unloaded">
+        Title="MainWindow" Height="750" Width="1150" Loaded="Window_Loaded" Unloaded="Window_Unloaded">
     <StackPanel>
+        <Button x:Name="BluetoothButton" Content="BluetoothManager" Click="BluetoothButton_Click" Height="40" Width="120" HorizontalAlignment="Left"/>
         <StackPanel Orientation="Horizontal">
             <StackPanel>
                 <StackPanel Orientation="Horizontal">

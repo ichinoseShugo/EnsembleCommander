@@ -4,7 +4,16 @@ using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
+
+//midi
 using NextMidi.Time;
+
+//bluetooth
+using Windows.Devices.Bluetooth;
+using Windows.Devices.Bluetooth.Rfcomm;
+using Windows.Networking.Sockets;
+using Windows.Storage.Streams;
+
 
 namespace EnsembleCommander
 {
@@ -38,7 +47,6 @@ namespace EnsembleCommander
         /// </summary>
         public string NowTonality = "major";
 
-
         public bool IsConnectRealSense = false;
 
         PXCMSenseManager senseManager;
@@ -53,7 +61,7 @@ namespace EnsembleCommander
 
         PXCMHandModule handAnalyzer;
         PXCMHandData handData;
-        
+
         const int COLOR_WIDTH = 960;
         const int COLOR_HEIGHT = 540;
         const int COLOR_FPS = 30;
@@ -84,6 +92,11 @@ namespace EnsembleCommander
                                     Colors.Purple
         };
 
+        /// <summary>
+        /// Bluetooth制御Window
+        /// </summary>
+        BluetoothWindow bWindow = null;
+
         //Mainイベント-------------------------------------------------------------------
 
         /// <summary>
@@ -92,6 +105,8 @@ namespace EnsembleCommander
         public MainWindow()
         {
             InitializeComponent();
+            Top = 90;
+            Left = 0;
         }
 
         /// <summary>
@@ -108,6 +123,9 @@ namespace EnsembleCommander
             ConnectCheck.Content = IsConnectRealSense;//バインド予定
             //WPFのオブジェクトがレンダリングされるタイミング(およそ1秒に50から60)に呼び出される
             CompositionTarget.Rendering += CompositionTarget_Rendering;
+
+            //bluetooth制御ウィンドウの表示
+            CreateBluetoothWindow();
         }
 
         /// <summary>
@@ -118,6 +136,7 @@ namespace EnsembleCommander
         private void Window_Unloaded(object sender, RoutedEventArgs e)
         {
             Uninitialize();
+            bWindow.Close();
         }
 
         /// <summary>
@@ -139,7 +158,7 @@ namespace EnsembleCommander
         /// <param name="data"></param>
         void OnFiredGesture(PXCMHandData.GestureData data)
         {
-            if (data.name.CompareTo("v_sign")==0)
+            if (data.name.CompareTo("v_sign") == 0)
             {
                 PlayMIDI();
             }
@@ -206,7 +225,7 @@ namespace EnsembleCommander
             */
 
             // コードリストの初期化チェック
-            int i=0;
+            int i = 0;
             foreach (var chord in midiManager.chordProgList[MODE_WHOLE])
             {
                 chord.SetNotes(MODE_WHOLE);
@@ -313,11 +332,7 @@ namespace EnsembleCommander
             NowRange = (int)PivotList.SelectedItem;
         }
 
-        /// <summary>
-        /// Majorのコード進行に書き換える
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
+        /// <summary> Majorのコード進行に書き換える </summary>
         private void Major_Checked(object sender, RoutedEventArgs e)
         {
             //System.Console.WriteLine("sender:" + sender);
@@ -335,11 +350,7 @@ namespace EnsembleCommander
             NowTonality = "major";
         }
 
-        /// <summary>
-        /// Minorのコード進行に書き換える
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
+        /// <summary> Minorのコード進行に書き換える </summary>
         private void Minor_Checked(object sender, RoutedEventArgs e)
         {
             //System.Console.WriteLine("sender:" + sender);
@@ -349,7 +360,7 @@ namespace EnsembleCommander
             {
                 //midiManager.TurnMinor(player.MusicTime, NowMode);
                 // 全てのモードに対してMinorに書き換える．
-                for(int i = 0; i < 5; i++)
+                for (int i = 0; i < 5; i++)
                 {
                     midiManager.TurnMinor(player.MusicTime, i);
                 }
@@ -357,22 +368,9 @@ namespace EnsembleCommander
             NowTonality = "minor";
         }
 
-        /// <summary>
-        /// Elementsが変わっていないことを自由に確認したい
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private void DisplayElements_Click(object sender, RoutedEventArgs e)
-        {
-
-
-        }
-
         //RealSenseメソッド-------------------------------------------------------------------
 
-        /// <summary>
-        /// 機能の初期化
-        /// </summary>
+        /// <summary> 機能の初期化 </summary>
         private bool InitializeRealSense()
         {
             try
@@ -430,9 +428,7 @@ namespace EnsembleCommander
             }
         }
 
-        /// <summary>
-        /// 手の検出の初期化
-        /// </summary>
+        /// <summary> 手の検出の初期化 </summary>
         private void InitializeHandTracking()
         {
             // 手の検出器を取得する
@@ -473,9 +469,7 @@ namespace EnsembleCommander
             config.Update();
         }
 
-        /// <summary>
-        /// RealSesnseの更新
-        /// </summary>
+        /// <summary> RealSesnseの更新 </summary>
         private void UpdateRealSense()
         {
             //フレームを取得する
@@ -506,14 +500,12 @@ namespace EnsembleCommander
                     1.0d,
                     myBrush);
             }
-           
+
             //フレームを解放する
             senseManager.ReleaseFrame();
         }
 
-        /// <summary>
-        /// カラーイメージが更新された時の処理
-        /// </summary>
+        /// <summary> カラーイメージが更新された時の処理 </summary>
         /// <param name="color"></param>
         private void UpdateColorImage(PXCMImage colorFrame)
         {
@@ -543,9 +535,7 @@ namespace EnsembleCommander
             colorFrame.ReleaseAccess(data);
         }
 
-        /// <summary>
-        /// 手のデータを更新する
-        /// </summary>
+        /// <summary> 手のデータを更新する </summary>
         private void UpdateHandFrame()
         {
             // 手のデータを更新する
@@ -571,12 +561,7 @@ namespace EnsembleCommander
             }
         }
 
-        /// <summary>
-        /// 指のデータを取得する
-        /// </summary>
-        /// <param name="hand"></param>
-        /// <param name="jointType"></param>
-        /// <returns></returns>
+        /// <summary> 指のデータを取得する </summary>
         private bool GetFingerData(PXCMHandData.IHand hand, PXCMHandData.JointType jointType)
         {
             PXCMHandData.JointData jointData;
@@ -592,7 +577,7 @@ namespace EnsembleCommander
             depthPoint[0].y = jointData.positionImage.y;
             depthPoint[0].z = jointData.positionWorld.z * 1000;
             projection.MapDepthToColor(depthPoint, colorPoint);
-            
+
             var masp = hand.QueryMassCenterImage();
             var mdp = new PXCMPoint3DF32[1];
             var mcp = new PXCMPointF32[1];
@@ -606,22 +591,22 @@ namespace EnsembleCommander
 
             //ユーザの右手に対して演奏領域の当たり判定確認
             if (hand.QueryBodySide() == PXCMHandData.BodySideType.BODY_SIDE_LEFT)
-            for (int i = 0; i < 5; i++)
-            {
-                if ((imageColor.Height / 5) * i <= colorPoint[0].y && colorPoint[0].y < (imageColor.Height / 5) * (i + 1))
+                for (int i = 0; i < 5; i++)
                 {
-                    if (16 - i != NowRange)
+                    if ((imageColor.Height / 5) * i <= colorPoint[0].y && colorPoint[0].y < (imageColor.Height / 5) * (i + 1))
                     {
-                        NowRange = 16 - i;
-                        PivotList.Dispatcher.BeginInvoke(
-                            new Action(() =>
-                            {
-                                PivotList.SelectedItem = NowRange;
-                            }
-                            ));
+                        if (16 - i != NowRange)
+                        {
+                            NowRange = 16 - i;
+                            PivotList.Dispatcher.BeginInvoke(
+                                new Action(() =>
+                                {
+                                    PivotList.SelectedItem = NowRange;
+                                }
+                                ));
+                        }
                     }
                 }
-            }
 
             //ユーザの左手に対してアイコンの当たり判定の確認
             if (hand.QueryBodySide() == PXCMHandData.BodySideType.BODY_SIDE_RIGHT)
@@ -631,10 +616,8 @@ namespace EnsembleCommander
 
             return true;
         }
-        
 
-        
-        public PXCMPoint3DF32 RightCenter= new PXCMPoint3DF32();        //手のひら
+        public PXCMPoint3DF32 RightCenter = new PXCMPoint3DF32();        //手のひら
         public PXCMPoint3DF32 preRightCenter = new PXCMPoint3DF32();
         public PXCMPoint3DF32 LeftCenter = new PXCMPoint3DF32();
         public PXCMPoint3DF32 preLeftCenter = new PXCMPoint3DF32();
@@ -726,14 +709,7 @@ namespace EnsembleCommander
 
         }
 
-        /// <summary>
-        /// 円を表示する
-        /// </summary>
-        /// <param name="canvas"></param>
-        /// <param name="point"></param>
-        /// <param name="radius"></param>
-        /// <param name="color"></param>
-        /// <param name="thickness"></param>
+        /// <summary> 円を表示する </summary>
         private void AddEllipse(Point point, int radius, Brush color, int thickness)
         {
             var ellipse = new Ellipse()
@@ -758,17 +734,7 @@ namespace EnsembleCommander
             CanvasFaceParts.Children.Add(ellipse);
         }
 
-        /// <summary>
-        /// 四角生成オブジェクト
-        /// </summary>
-        /// <param name="x"></param>
-        /// <param name="y"></param>
-        /// <param name="width"></param>
-        /// <param name="height"></param>
-        /// <param name="stroke"></param>
-        /// <param name="thickness"></param>
-        /// <param name="fill"></param>
-        /// <returns></returns>
+        /// <summary> 四角を表示する </summary>
         private void AddRectangle(double y, double height, double width, Brush stroke, double thickness, Brush fill)
         {
             Rectangle rect = new Rectangle
@@ -783,19 +749,16 @@ namespace EnsembleCommander
             CanvasFaceParts.Children.Add(rect);
         }
 
-        /// <summary>
-        /// アイコンの当たり判定の確認
-        /// </summary>
-        /// <param name="p"></param>
+        /// <summary> アイコンの当たり判定の確認 </summary>
         private void IconHitCheck(PXCMPointF32 p)
         {
             //Console.WriteLine((imageColor.Width / 5) * 2);
             //x座標がアイコン領域外ならreturn
-            if (p.x < 0 || p.x > (imageColor.Width/5)*2) return;
+            if (p.x < 0 || p.x > (imageColor.Width / 5) * 2) return;
 
             for (int mode = 0; mode < 5; mode++)
             {
-                if ((imageColor.Height/5) * mode < p.y && p.y < (imageColor.Height / 5) * (mode+1))
+                if ((imageColor.Height / 5) * mode < p.y && p.y < (imageColor.Height / 5) * (mode + 1))
                 {
                     Dispatcher.BeginInvoke(
                             new Action(() =>
@@ -827,9 +790,7 @@ namespace EnsembleCommander
             }
         }
 
-        /// <summary>
-        /// 終了処理
-        /// </summary>
+        /// <summary> 終了処理 </summary>
         private void Uninitialize()
         {
             if (senseManager != null)
@@ -859,10 +820,7 @@ namespace EnsembleCommander
 
         //MIDIメソッド-----------------------------------------------------------
 
-        /// <summary>
-        /// MIDIの初期化
-        /// </summary>
-        /// <param name="portnum"></param>
+        /// <summary> MIDIの初期化 </summary>
         void InitializeMIDI()
         {
             midiManager = new MidiManager();
@@ -870,9 +828,7 @@ namespace EnsembleCommander
             player.Stopped += Player_Stopped;
         }
 
-        /// <summary>
-        /// 各フレームにおけるMIDIの処理
-        /// </summary>
+        /// <summary> 各フレームにおけるMIDIの処理 </summary>
         private void UpdateMIDI()
         {
             double pos = (MidiManager.TICK_UNIT * player.MusicTime.Measure + player.MusicTime.Tick)
@@ -892,9 +848,7 @@ namespace EnsembleCommander
             player.Stop();
         }
 
-        /// <summary>
-        /// ボタンなどの初期化
-        /// </summary>
+        /// <summary> ボタンなどの初期化 </summary>
         void InitializeView()
         {
             int[] Ranges = new int[16];
@@ -902,9 +856,31 @@ namespace EnsembleCommander
             PivotList.ItemsSource = null;
             PivotList.ItemsSource = Ranges;
         }
+
+        //Bluetoothメソッド-----------------------------------------------------------
+
+        private void CreateBluetoothWindow()
+        {
+            //bluetooth制御ウィンドウの表示
+            bWindow = new BluetoothWindow(this.ActualWidth);
+            bWindow.Closed += BWindow_Closed;
+            bWindow.Show();
+        }
+
+        //Bluetoothイベント-----------------------------------------------------------
+
+        private void BWindow_Closed(object sender, EventArgs e)
+        {
+            bWindow = null;
+        }
+
+        private void BluetoothButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (bWindow!=null) return;
+            CreateBluetoothWindow();
+        }
     }
 }
-
 
 /* memo
  * NowTonarityをMidiManagerクラスのほうで定義して、for文の中で判定

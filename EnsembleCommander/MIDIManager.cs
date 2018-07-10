@@ -271,7 +271,6 @@ namespace EnsembleCommander
             midiData.Tracks.RemoveAt(0);
         }
 
-
         /* MEMO
          * 
          * 将来的にユーザがコード進行を作っていく場合に、
