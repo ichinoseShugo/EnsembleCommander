@@ -26,12 +26,16 @@ namespace EnsembleCommander
         int deviceOerder = 0;
         System.Diagnostics.Stopwatch stopWatch = new System.Diagnostics.Stopwatch();
         public int s = 0;
-        
-        public BluetoothWindow(double mainWidth)
+
+        MainWindow main;
+
+        public BluetoothWindow(MainWindow m, double mainWidth)
         {
             InitializeComponent();
             Top = 90;
             Left = mainWidth;
+
+            main = m;
         }
 
         private void ListenButton_Click(object sender, System.Windows.RoutedEventArgs e)
@@ -41,7 +45,7 @@ namespace EnsembleCommander
                 bServerList[0].Listen(deviceOerder++);
                 return;
             }
-            BluetoothManager bluetoothServer = new BluetoothManager(this);
+            BluetoothManager bluetoothServer = new BluetoothManager(main, this);
             bluetoothServer.Listen(deviceOerder);
             bServerList.Add(bluetoothServer);
             deviceOerder++;

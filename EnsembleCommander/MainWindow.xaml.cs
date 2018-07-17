@@ -862,7 +862,7 @@ namespace EnsembleCommander
         private void CreateBluetoothWindow()
         {
             //bluetooth制御ウィンドウの表示
-            bWindow = new BluetoothWindow(this.ActualWidth);
+            bWindow = new BluetoothWindow(this, this.ActualWidth);
             bWindow.Closed += BWindow_Closed;
             bWindow.Show();
         }

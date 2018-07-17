@@ -23,8 +23,11 @@ namespace EnsembleCommander
 
         BluetoothWindow bWindow;
 
-        public BluetoothManager(BluetoothWindow window)
+        MainWindow main;
+
+        public BluetoothManager(MainWindow m, BluetoothWindow window)
         {
+            main = m;
             bWindow = window;
         }
 
@@ -205,8 +208,9 @@ namespace EnsembleCommander
                     Console.WriteLine(5);
                     await socket.OutputStream.WriteAsync(bytes.AsBuffer());
                     await Task.Delay(delay);
-                    now = DateTime.Now.ToString();
-                    Console.WriteLine(now);
+                    //now = DateTime.Now.ToString();
+                    //Console.WriteLine(now);
+                    main.PlayMIDI();
                 }
             }
             catch
