@@ -88,7 +88,7 @@ namespace EnsembleCommander
                 Elements = new NoteEvent[numbers.Length];
                 for (int i = 0; i < numbers.Length; i++)
                 {
-                    Elements[i] = new NoteEvent(numbers[i], 80, 240 * 4)
+                    Elements[i] = new NoteEvent(numbers[i], 80, 480 * 4)
                     {
                         Tick = tickFromStart
                     };
@@ -96,7 +96,7 @@ namespace EnsembleCommander
             }
 
             //Base音の設定
-            Base = new NoteEvent((byte)(root - 24), 80, 240 * 4)//音高，音量，長さ
+            Base = new NoteEvent((byte)(root - 24), 80, 480 * 4)//音高，音量，長さ
             {
                 Tick = tickFromStart//Base音の開始タイミングを指定
             };
@@ -260,8 +260,8 @@ namespace EnsembleCommander
                             if (i == 0) note.Velocity = 85;
                             if (i == 2) note.Velocity = 75;
                             if (i == 1 || i == 3) note.Velocity = 70;
-                            note.Gate = 240;
-                            note.Tick += i * 240;
+                            note.Gate = 480;
+                            note.Tick += i * 480;
                             NoteList.Add(note);
                         }
                     }
@@ -271,17 +271,17 @@ namespace EnsembleCommander
                     for (int i = 0; i < 3; i++)
                     {
                         NoteList.Add((NoteEvent)Elements[i].Clone());
-                        NoteList[i].Tick = TickFromStart + i * 240;
+                        NoteList[i].Tick = TickFromStart + i * 480;
                     }
                     if(Elements.Length < 4)
                     {
                         NoteList.Add((NoteEvent)Elements[0].Clone());
-                        NoteList[3].Tick = TickFromStart + 3 * 240;
+                        NoteList[3].Tick = TickFromStart + 3 * 480;
                     }
                     else
                     {
                         NoteList.Add((NoteEvent)Elements[3].Clone());
-                        NoteList[3].Tick = TickFromStart + 3 * 240;
+                        NoteList[3].Tick = TickFromStart + 3 * 480;
                     }
                     break;
 

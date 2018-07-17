@@ -2,6 +2,7 @@
 using NextMidi.Data.Domain;
 using NextMidi.Data.Track;
 using NextMidi.DataElement;
+using NextMidi.DataElement.MetaData;
 using NextMidi.MidiPort.Output;
 using NextMidi.Time;
 using System;
@@ -48,10 +49,10 @@ namespace EnsembleCommander
         };
 
         //public string[] inputedChord = { "C", "Am", "F", "G", "Em", "F", "G", "C" }; //背景楽曲のコード進行配列
-        //public string[] inputedChord = { "C", "Am", "F", "G", "Em", "F", "G", "C", "C", "Am", "F", "G", "Em", "F", "G", "C" }; //背景楽曲のコード進行配列
+        public string[] inputedChord = { "C", "Am", "F", "G", "Em", "F", "G", "C", "C", "Am", "F", "G", "Em", "F", "G", "C" }; //背景楽曲のコード進行配列
         //public string[] inputedChord = { "C", "Em", "F", "G", "Em", "Am", "Dm", "G", "Am", "Em", "F", "Em", "Dm", "C", "G", "C" }; //背景楽曲のコード進行配列 
         //public string[] inputedChord = { "C", "G", "Am", "Em", "F", "C", "F", "G" }; //背景楽曲のコード進行配列 
-        public string[] inputedChord = { "D", "A", "Bm", "F#m", "G", "D", "G", "A" }; //背景楽曲のコード進行配列 
+        //public string[] inputedChord = { "D", "A", "Bm", "F#m", "G", "D", "G", "A" }; //背景楽曲のコード進行配列 
         //public string[] inputedChord = { "F", "Fm", "Em", "A7" }; //白松研においでよ
         public byte KeyNoteNumber = 60;
         //public string KeyNote = "C";//将来的に使うかもしれない
@@ -128,7 +129,7 @@ namespace EnsembleCommander
         private const int MODE_DELAY = 3;
         private const int MODE_FREE = 4;
 
-        public const int TICK_UNIT = 240 * 4;
+        public const int TICK_UNIT = 480 * 4;
 
         /// <summary>
         /// MIDIの初期化
@@ -136,6 +137,7 @@ namespace EnsembleCommander
         /// <param name="portnum"></param>
         public MidiManager()
         {
+
             int NumOfMode = ModeList.Length;
             //モードの数だけトラック配列の要素数を用意する
             tracks = new MidiTrack[NumOfMode];
@@ -176,12 +178,13 @@ namespace EnsembleCommander
                 Console.WriteLine("no such port exists");
                 return;
             }
-
+            
             //midiDataにtrackを対応付け
             midiData = new MidiData();
             midiData.Tracks.Add(tracks[MODE_WHOLE]);
             // テンポマップを作成
             domain = new MidiFileDomain(midiData);
+            Console.WriteLine(domain.TempoMap.ToString());
         }
 
         /// <summary>
@@ -256,7 +259,7 @@ namespace EnsembleCommander
                 {
                     note.Tick = TICK_UNIT * time.Measure + time.Tick + 1;
                     note.Velocity = 80;
-                    note.Gate = 240;
+                    note.Gate = 480;
                     note.Speed = 120;
                 }
         }
