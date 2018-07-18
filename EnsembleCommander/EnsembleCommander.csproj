@@ -165,7 +165,7 @@
       <DependentUpon>BluetoothWindow.xaml</DependentUpon>
     </Compile>
     <Compile Include="Bluetooth\RfcommDeviceDisplay.cs" />
-    <Compile Include="Chord.cs" />
+    <Compile Include="Midi\Chord.cs" />
     <Compile Include="Constants.cs" />
     <Compile Include="MainWindow.xaml.cs">
       <DependentUpon>MainWindow.xaml</DependentUpon>
@@ -173,7 +173,7 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="MidiManager.cs" />
+    <Compile Include="Midi\MidiManager.cs" />
     <Compile Include="Properties\AssemblyInfo.cs">
       <SubType>Code</SubType>
     </Compile>
