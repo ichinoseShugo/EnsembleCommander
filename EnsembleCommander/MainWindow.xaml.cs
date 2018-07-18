@@ -9,6 +9,7 @@ using System.Windows.Shapes;
 using NextMidi.Time;
 
 //bluetooth
+using EnsembleCommander.Bluetooth;
 using Windows.Devices.Bluetooth;
 using Windows.Devices.Bluetooth.Rfcomm;
 using Windows.Networking.Sockets;
@@ -862,7 +863,7 @@ namespace EnsembleCommander
         private void CreateBluetoothWindow()
         {
             //bluetooth制御ウィンドウの表示
-            bWindow = new BluetoothWindow(this, this.ActualWidth);
+            bWindow = new BluetoothWindow(this);
             bWindow.Closed += BWindow_Closed;
             bWindow.Show();
         }

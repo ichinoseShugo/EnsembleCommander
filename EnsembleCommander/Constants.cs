@@ -8,14 +8,13 @@ namespace EnsembleCommander
 {
     public static class Constants
     {
-        public static readonly string MODE_WHOLE = "0";
-        public static readonly string MODE_QUARTER = "1";
-        public static readonly string MODE_ARPEGGIO = "2";
-        public static readonly string MODE_DELAY = "3";
-        public static readonly string MODE_FREE = "4";
+        public const int MODE_WHOLE = 0;
+        public const int MODE_QUARTER = 1;
+        public const int MODE_ARPEGGIO = 2;
+        public const int MODE_DELAY = 3;
+        public const int MODE_FREE = 4;
 
         /// <summary>BluetoothWindowが閉じられているならtrue</summary>
         public static bool bwIsClosed = true;
-
     }
 }

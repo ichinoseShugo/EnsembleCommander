@@ -148,7 +148,7 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
-    <Page Include="BluetoothWindow.xaml">
+    <Page Include="Bluetooth\BluetoothWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -160,10 +160,11 @@
       <DependentUpon>App.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="BluetoothManager.cs" />
-    <Compile Include="BluetoothWindow.xaml.cs">
+    <Compile Include="Bluetooth\BluetoothServercs.cs" />
+    <Compile Include="Bluetooth\BluetoothWindow.xaml.cs">
       <DependentUpon>BluetoothWindow.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Bluetooth\RfcommDeviceDisplay.cs" />
     <Compile Include="Chord.cs" />
     <Compile Include="Constants.cs" />
     <Compile Include="MainWindow.xaml.cs">

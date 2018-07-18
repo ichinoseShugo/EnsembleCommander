@@ -168,12 +168,6 @@ namespace EnsembleCommander
                     tracks[mode].Insert(chord.Base); //ベース音の挿入
                     foreach (var note in chord.NoteList) tracks[mode].Insert(note); //伴奏音の挿入
                 }
-
-                tracks[mode].GetData<TempoEvent>().Add(new TempoEvent() { Tempo = 20,Tick=0,Channel=0});
-                //Console.WriteLine(tracks[mode].GetData<TempoEvent>().Count);
-                var a = tracks[mode].GetData<TempoEvent>();
-                a.Add(new TempoEvent() { Tempo = 20, Tick = 0});
-                //Console.WriteLine(a.Count);
             }
             port = new MidiOutPort(0);
             try

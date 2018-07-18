@@ -12,11 +12,6 @@ namespace EnsembleCommander
 { 
     class Chord
     {
-        private const int MODE_WHOLE = 0;
-        private const int MODE_QUATER = 1;
-        private const int MODE_ARPEGGIO = 2;
-        private const int MODE_DELAY = 3;
-        private const int MODE_FREE = 4;
         /// <summary>
         /// 正規表現によるルート音(A,C#,Dbなど)のパターン
         /// </summary>
@@ -247,11 +242,11 @@ namespace EnsembleCommander
         {
             switch (mode)
             {
-                case MODE_WHOLE: //全音符モードの設定;
+                case Constants.MODE_WHOLE: //全音符モードの設定;
                     foreach (var element in Elements) NoteList.Add((NoteEvent)element.Clone());
                     break;
 
-                case MODE_QUATER: //四分音符モードの設定
+                case Constants.MODE_QUARTER: //四分音符モードの設定
                     for (int i = 0; i < 4; i++)
                     {
                         foreach (var element in Elements)
@@ -267,7 +262,7 @@ namespace EnsembleCommander
                     }
                     break;
 
-                case MODE_ARPEGGIO: //アルペジオモードの設定
+                case Constants.MODE_ARPEGGIO: //アルペジオモードの設定
                     for (int i = 0; i < 3; i++)
                     {
                         NoteList.Add((NoteEvent)Elements[i].Clone());
@@ -285,7 +280,7 @@ namespace EnsembleCommander
                     }
                     break;
 
-                case MODE_DELAY: //ディレイモードの設定
+                case Constants.MODE_DELAY: //ディレイモードの設定
                     for (int i = 0; i < 5; i++)
                     {
                         foreach (var element in Elements)
@@ -299,7 +294,7 @@ namespace EnsembleCommander
                     }
                     break;
 
-                case MODE_FREE: //フリーモードの設定
+                case Constants.MODE_FREE: //フリーモードの設定
                     foreach (var element in Elements) NoteList.Add((NoteEvent)element.Clone());
                     foreach (var note in NoteList)
                     {
