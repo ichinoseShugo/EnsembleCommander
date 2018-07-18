@@ -27,16 +27,19 @@ namespace EnsembleCommander
         private RfcommServiceProvider rfcommProvider;
         private StreamSocketListener socketListener;
 
+        private MainWindow main;
+
         /// <summary> 遅延計測用ストップウォッチ </summary>
         private System.Diagnostics.Stopwatch stopWatch = new System.Diagnostics.Stopwatch();
 
-        public BluetoothServer(int dOrder, RfcommDeviceDisplay dinfo, BluetoothWindow b)
+        public BluetoothServer(int dOrder, RfcommDeviceDisplay dinfo, BluetoothWindow b, MainWindow m)
         {
             deviceOrder = dOrder;
             deviceInfo = dinfo;
             deviceName = dinfo.Name;
             deviceId = dinfo.Id.Split('-')[1].Replace(":", "");
             mBWindow = b;
+            main = m;
         }
 
         #region イベントハンドラ
@@ -178,6 +181,51 @@ namespace EnsembleCommander
             }
         }
 
+        /// <summary> Midiの開始 </summary>
+        public async void StartMidi()
+        {
+            try
+            {
+                if (socket != null)
+                {
+                    //7文字(7バイト)のデータ
+                    string data = "ABCDEFG";
+                    //バイトデータの文字コードを変更(androidを想定してUTF8に変更しているが変更の必要があるかどうかは未実験、必要ないかも)
+                    byte[] bytes = Encoding.UTF8.GetBytes(data);
+                    stopWatch.Reset();
+                    stopWatch.Start();
+                    //OutputStreamに文字列を送信
+                    await socket.OutputStream.WriteAsync(bytes.AsBuffer());
+                    var ns = socket.InputStream;
+                    byte[] buffer = new byte[120];
+                    //InputStreamのデータを変数bufferに格納
+                    await socket.InputStream.ReadAsync(buffer.AsBuffer(), 120, InputStreamOptions.Partial);
+                    stopWatch.Stop();
+                    //受信したbyteデータを文字列に変換
+                    string str = Encoding.GetEncoding("ASCII").GetString(buffer);
+                    int delay = int.Parse(stopWatch.ElapsedMilliseconds.ToString());
+                    await socket.OutputStream.WriteAsync(bytes.AsBuffer());
+                    await Task.Delay(delay);
+                    main.PlayMIDI();
+                }
+            }
+            catch
+            {
+                lock (this)
+                {
+                    if (socket == null)
+                    {
+                        // Do not print anything here -  the user closed the sock
+                    }
+                    else
+                    {
+                        Disconnect();
+                        Console.WriteLine("【ping】Player" + (deviceId + 1) + "との通信が切断されました");
+                    }
+                }
+            }
+        }
+
         /// <summary> Clientとの接続を切断 </summary>
         public void Disconnect()
         {
@@ -208,70 +256,6 @@ namespace EnsembleCommander
                 socket = null;
             }
         }
-
-        #region 遅延計測実験
-        private System.Diagnostics.Stopwatch pingStopWatch = new System.Diagnostics.Stopwatch();
-        public List<long> delayTimeList = new List<long>();
-        /// <summary> 接続したClientとの送受信遅延時間を計測する </summary>
-        public async void Ping(int times)
-        {
-            try
-            {
-                if (socket != null)
-                {
-                    System.Diagnostics.Stopwatch StopWatch2 = new System.Diagnostics.Stopwatch();
-                    //7文字(7バイト)のデータ
-                    string data = "ABCDEFG";
-                    //バイトデータの文字コードを変更(androidを想定してUTF8に変更しているが変更の必要があるかどうかは未実験、必要ないかも)
-                    byte[] bytes = System.Text.Encoding.UTF8.GetBytes(data);
-                    //StopWatch2.Reset();
-                    StopWatch2.Start();
-                    //OutputStreamに文字列を送信
-                    await socket.OutputStream.WriteAsync(bytes.AsBuffer());
-                    var ns = socket.InputStream;
-                    byte[] buffer = new byte[120];
-                    //InputStreamのデータを変数bufferに格納
-                    await socket.InputStream.ReadAsync(buffer.AsBuffer(), 120, InputStreamOptions.Partial);
-                    StopWatch2.Stop();
-                    delayTimeList.Add(StopWatch2.ElapsedMilliseconds);
-                    //受信したbyteデータを文字列に変換
-                    string str = Encoding.GetEncoding("ASCII").GetString(buffer);
-                    times++;
-                }
-            }
-            catch
-            {
-                lock (this)
-                {
-                    if (socket == null)
-                    {
-                        // Do not print anything here -  the user closed the sock
-                    }
-                    else
-                    {
-                        Disconnect();
-                        Console.WriteLine("【ping】Player" + (deviceId + 1) + "との通信が切断されました");
-                    }
-                }
-            }
-            if (times < 50)
-            {
-                try
-                {
-                    //System.Threading.Thread.Sleep();
-                    //Ping(times);
-                }
-                catch
-                {
-                }
-            }
-            else
-            {
-                times = 0;
-                Console.WriteLine("ping実験終了");
-            }
-        }
-        #endregion
         #endregion
     }
 }

@@ -80,7 +80,7 @@ namespace EnsembleCommander
                 Console.WriteLine("もうある");
                 return;
             }
-            BluetoothServer bluetoothServer = new BluetoothServer(deviceCount++, selectedDevice, this);
+            BluetoothServer bluetoothServer = new BluetoothServer(deviceCount++, selectedDevice, this, main);
             bServerList.Add(bluetoothServer);
             bluetoothServer.Listen();
 
@@ -89,7 +89,7 @@ namespace EnsembleCommander
             DisconnectButton.IsEnabled = true;
             ReadButton.IsEnabled = true;
             SendButton.IsEnabled = true;
-            PingButton.IsEnabled = true;
+            StartMidiButton.IsEnabled = true;
         }
         private void SendButton_Click(object sender, RoutedEventArgs e)
         {
@@ -113,10 +113,10 @@ namespace EnsembleCommander
             }
             deviceCount--;
         }
-        private void PingButton_Click(object sender, RoutedEventArgs e)
+        private void StartMidiButton_Click(object sender, RoutedEventArgs e)
         {
             if (PairingList.SelectedValue == null) return;
-            bServerList[selectedIndex].Ping(0);
+            bServerList[selectedIndex].StartMidi();
         }
 
         #region 接続可能なデバイス一覧の取得と表示

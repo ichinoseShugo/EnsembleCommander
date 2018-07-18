@@ -13,7 +13,7 @@
         <Button x:Name="DisconnectButton" IsEnabled="False" Click="DisconnectButton_Click" Content="Disconnect"/>
         <Button x:Name="ReadButton" Content="Read" IsEnabled="False" Click="ReadButton_Click"/>
         <Button x:Name="SendButton" Content="Send" IsEnabled="False" Click="SendButton_Click"/>
-        <Button x:Name="PingButton" Content="Ping" IsEnabled="False" Click="PingButton_Click"/>
+        <Button x:Name="StartMidiButton" Content=" StartMidi" IsEnabled="False" Click=" StartMidiButton_Click"/>
         <Grid>
             <Grid.RowDefinitions>
                 <RowDefinition Height="1*"/>
