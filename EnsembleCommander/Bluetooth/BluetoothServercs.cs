@@ -140,10 +140,6 @@ namespace EnsembleCommander
                 //バイトデータの文字コードを変更(androidを想定してUTF8に変更しているが変更の必要があるかどうかは未実験、必要ないかも)
                 byte[] bytes = Encoding.UTF8.GetBytes(data);
 
-                //遅延計測開始
-                stopWatch.Reset();
-                stopWatch.Start();
-
                 //OutputStreamに文字列を送信
                 await socket.OutputStream.WriteAsync(bytes.AsBuffer());
             }
@@ -188,25 +184,22 @@ namespace EnsembleCommander
             {
                 if (socket != null)
                 {
-                    //7文字(7バイト)のデータ
-                    string data = "ABCDEFG";
+                    //文字のデータ
+                    string data = main.SetTarget();
+                    Console.WriteLine(data);
                     //バイトデータの文字コードを変更(androidを想定してUTF8に変更しているが変更の必要があるかどうかは未実験、必要ないかも)
                     byte[] bytes = Encoding.UTF8.GetBytes(data);
-                    stopWatch.Reset();
-                    stopWatch.Start();
                     //OutputStreamに文字列を送信
                     await socket.OutputStream.WriteAsync(bytes.AsBuffer());
+                    /*
                     var ns = socket.InputStream;
                     byte[] buffer = new byte[120];
                     //InputStreamのデータを変数bufferに格納
                     await socket.InputStream.ReadAsync(buffer.AsBuffer(), 120, InputStreamOptions.Partial);
-                    stopWatch.Stop();
                     //受信したbyteデータを文字列に変換
                     string str = Encoding.GetEncoding("ASCII").GetString(buffer);
-                    int delay = int.Parse(stopWatch.ElapsedMilliseconds.ToString());
                     await socket.OutputStream.WriteAsync(bytes.AsBuffer());
-                    await Task.Delay(delay);
-                    main.PlayMIDI();
+                    */
                 }
             }
             catch

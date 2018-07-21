@@ -14,7 +14,7 @@ using Windows.Devices.Bluetooth;
 using Windows.Devices.Bluetooth.Rfcomm;
 using Windows.Networking.Sockets;
 using Windows.Storage.Streams;
-
+using System.Windows.Threading;
 
 namespace EnsembleCommander
 {
@@ -127,6 +127,8 @@ namespace EnsembleCommander
 
             //bluetooth制御ウィンドウの表示
             CreateBluetoothWindow();
+
+            SetTarget();
         }
 
         /// <summary>
@@ -879,6 +881,102 @@ namespace EnsembleCommander
         {
             if (bWindow!=null) return;
             CreateBluetoothWindow();
+        }
+
+
+        public DateTime Target;
+        public DateTime dt = new DateTime(1900, 1, 1);
+        public System.Diagnostics.Stopwatch sw = new System.Diagnostics.Stopwatch();
+        DispatcherTimer playTimer;
+
+        public void UpdateNTPTime()
+        {
+            // UDP生成
+            System.Net.Sockets.UdpClient objSck;
+            System.Net.IPEndPoint ipAny = new System.Net.IPEndPoint(System.Net.IPAddress.Any, 0);
+            objSck = new System.Net.Sockets.UdpClient(ipAny);
+
+            // UDP送信
+            Byte[] sdat = new Byte[48];
+            sdat[0] = 0xB;
+            objSck.Send(sdat, sdat.GetLength(0), "ntp.nict.jp", 123);
+
+            // UDP受信
+            Byte[] rdat = objSck.Receive(ref ipAny);
+
+            // 1900年1月1日からの経過時間(日時分秒)
+            long lngAllS; // 1900年1月1日からの経過秒数
+            long lngD;    // 日
+            long lngH;    // 時
+            long lngM;    // 分
+            long lngS;    // 秒
+
+            // 1900年1月1日からの経過秒数
+            lngAllS = (long)(rdat[40] * (double)16777216 //2^24 Math.Pow(2, (8 * 3))
+                    + rdat[41] * (double)65536    //2^16    
+                    + rdat[42] * (double)256      //2^8 
+                    + rdat[43]);
+
+            /*
+            lngAllS = (long)(rdat[40] * Math.Pow(2, (8 * 3)) //2^24
+                    + rdat[41] * Math.Pow(2, (8 * 2))    //2^16    
+                    + rdat[42] * Math.Pow(2, (8 * 1))      //2^8 
+                    + rdat[43]);
+                    */
+
+            lngD = lngAllS / (24 * 60 * 60); // 日
+            lngS = lngAllS % (24 * 60 * 60); // 残りの秒数
+            lngH = lngS / (60 * 60);         // 時
+            lngS = lngS % (60 * 60);         // 残りの秒数
+            lngM = lngS / 60;                // 分
+            lngS = lngS % 60;                // 秒
+
+            long pico = (long)(rdat[44] * (double)16777216   //2^24
+                        + rdat[45] * (double)65536    //2^16    
+                        + rdat[46] * (double)256      //2^8 
+                        + rdat[47]);
+
+            long mill = (long)((pico * 1000) / (double)4294967296); //2~32
+
+            // DateTime型への変換
+            dt = dt.AddDays(lngD);
+            dt = dt.AddHours(lngH);
+            dt = dt.AddMinutes(lngM);
+            dt = dt.AddSeconds(lngS);
+            dt = dt.AddMilliseconds(mill);
+            //グリニッジ標準時から日本時間への変更
+            dt = dt.AddHours(9);
+            sw.Start();
+        }
+        
+        public string SetTarget()
+        {
+            Target = dt.Add(sw.Elapsed).AddSeconds(5);
+            InitPlayTimer();
+            Console.WriteLine();
+            return Target.ToLongTimeString() + ":" + Target.Millisecond;
+        }
+
+        private void InitPlayTimer()
+        {
+            //初期化、普通にする際はプロパティはNormalでよいかと
+            playTimer = new DispatcherTimer(DispatcherPriority.Normal);
+            //左から　日数、時間、分、秒、ミリ秒で設定　今回は10ミリ秒ごとつまり1秒あたり100回処理します
+            playTimer.Interval = new TimeSpan(0, 0, 0, 0, 10);
+            //dispatcherTimer.Tick += new EventHandler(DispatcherTimer_Tick);
+            playTimer.Tick += new EventHandler(PlayTimer_Tick);
+            playTimer.Start();
+        }
+
+        private void PlayTimer_Tick(object sender, EventArgs e)
+        {
+            DateTime now = dt.Add(sw.Elapsed);
+            if (now > Target)
+            {
+                PlayMIDI();
+                Console.WriteLine("starg");
+                playTimer.Stop();
+            }
         }
     }
 }

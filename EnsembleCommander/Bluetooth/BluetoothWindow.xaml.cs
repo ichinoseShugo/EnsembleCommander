@@ -89,7 +89,7 @@ namespace EnsembleCommander
             DisconnectButton.IsEnabled = true;
             ReadButton.IsEnabled = true;
             SendButton.IsEnabled = true;
-            StartMidiButton.IsEnabled = true;
+            //StartMidiButton.IsEnabled = true;
         }
         private void SendButton_Click(object sender, RoutedEventArgs e)
         {
@@ -116,6 +116,8 @@ namespace EnsembleCommander
         private void StartMidiButton_Click(object sender, RoutedEventArgs e)
         {
             if (PairingList.SelectedValue == null) return;
+
+            main.UpdateNTPTime();
             bServerList[selectedIndex].StartMidi();
         }
 
