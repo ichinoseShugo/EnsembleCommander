@@ -115,10 +115,13 @@ namespace EnsembleCommander
         }
         private void StartMidiButton_Click(object sender, RoutedEventArgs e)
         {
-            if (PairingList.SelectedValue == null) return;
+            //if (PairingList.SelectedValue == null) return;
 
             main.UpdateNTPTime();
-            bServerList[selectedIndex].StartMidi();
+            for (int i = 0; i < bServerList.Count; i++)
+            {
+                bServerList[i].StartMidi();
+            }
         }
 
         #region 接続可能なデバイス一覧の取得と表示

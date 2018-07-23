@@ -3,6 +3,7 @@ using NextMidi.Data.Domain;
 using NextMidi.Data.Track;
 using NextMidi.DataElement;
 using NextMidi.DataElement.MetaData;
+using NextMidi.Filing.Midi;
 using NextMidi.MidiPort.Output;
 using NextMidi.Time;
 using System;
@@ -182,7 +183,7 @@ namespace EnsembleCommander
             
             //midiDataにtrackを対応付け
             midiData = new MidiData();
-            midiData.Tracks.Add(tracks[MODE_WHOLE]);
+            midiData.Tracks.Add(tracks[MODE_QUARTER]);
 
             // テンポマップを作成
             domain = new MidiFileDomain(midiData);
@@ -375,6 +376,5 @@ namespace EnsembleCommander
             }
 
         }
-
     }
 }

@@ -206,6 +206,7 @@
     </Content>
     <Content Include="References\avenue.core.dll" />
     <Content Include="References\System.Runtime.WindowsRuntime.dll" />
+    <Content Include="Resources\StartTiming.wav" />
     <Resource Include="References\System.Runtime.WindowsRuntime.xml" />
     <Resource Include="References\avenue.core.xml" />
     <Content Include="References\avenue.filing.dll" />

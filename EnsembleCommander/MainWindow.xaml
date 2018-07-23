@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:EnsembleCommander"
         mc:Ignorable="d"
-        Title="MainWindow" Height="750" Width="1150" Loaded="Window_Loaded" Unloaded="Window_Unloaded">
+        Title="MainWindow" Height="750" Width="1050" Loaded="Window_Loaded" Unloaded="Window_Unloaded">
     <StackPanel>
         <Button x:Name="BluetoothButton" Content="BluetoothManager" Click="BluetoothButton_Click" Height="40" Width="120" HorizontalAlignment="Left"/>
         <StackPanel Orientation="Horizontal">
@@ -14,19 +14,20 @@
                     <RadioButton x:Name="OnMidi" Content="MIDI On" Margin="5" Click="OnMidi_Click"/>
                     <RadioButton x:Name="OffMidi" IsChecked="true" Content="MIDI Off" Margin="5" Click="OffMidi_Click"/>
                 </StackPanel>
+                <CheckBox x:Name="LoopMidiCheck" Content="MIDI Loop" Margin="5"/>
                 <StackPanel Orientation="Horizontal">
-                    <RadioButton x:Name="OnWholeTone" IsChecked="True" Content="Whole" Margin="5" Checked="OnWholeTone_Checked"/>
-                    <RadioButton x:Name="OnQuarterTone" Content="Quarter" Margin="5" Checked="OnQuarterTone_Checked"/>
+                    <RadioButton x:Name="OnWholeTone" Content="Whole" Margin="5" Checked="OnWholeTone_Checked"/>
+                    <RadioButton x:Name="OnQuarterTone" IsChecked="True" Content="Quarter" Margin="5" Checked="OnQuarterTone_Checked"/>
                     <RadioButton x:Name="OnArpeggio" Content="Arpeggio" Margin="5" Checked="OnArpeggio_Checked"/>
                     <RadioButton x:Name="OnDelay" Content="Delay" Margin="5" Checked="OnDelay_Checked"/>
                     <RadioButton x:Name="OnFree" Content="Free" Margin="5" Checked="OnFree_Checked"/>
                 </StackPanel>
-                <StackPanel Orientation="Horizontal">
+                <StackPanel Orientation="Horizontal" Visibility="Hidden">
                     <RadioButton x:Name="Major" IsChecked="true" Content="Major" Margin="5" Checked="Major_Checked"/>
                     <RadioButton x:Name="Minor" Content="Minor" Margin="5" Checked="Minor_Checked"/>
                 </StackPanel>
-                <Button Name="OnNote" Content="Tap" Click="OnNote_Click"/>
-                <StackPanel Orientation="Horizontal">
+                <Button Name="OnNote" Content="Tap" Click="OnNote_Click" Visibility="Hidden"/>
+                <StackPanel Orientation="Horizontal" Visibility="Hidden">
                     <Label Name="ConnectCheck" Content="UnConnect"/>
                     <Label Name="HandID" Content="none"/>
                 </StackPanel>
@@ -35,10 +36,10 @@
                 <Border BorderThickness="1" BorderBrush="#FF00A1FF" />
                 <Line Name="CurrentLine" StrokeThickness="5" X1="0" Y1="0" X2="0" Y2="100" Stroke="#FF3062E8" />
             </Grid>
-            <Image Name="LectureTonality" Width="200" Height="120" Source="Resources/Lectures/SetTonality.png"/>
+            <Image Name="LectureTonality" Width="200" Height="120" Source="Resources/Lectures/SetTonality.png" Visibility="Hidden"/>
         </StackPanel>
         <StackPanel Orientation="Horizontal">
-            <ListBox Name="PivotList" Width="40" SelectionChanged="PivotList_SelectionChanged"/>
+            <ListBox Name="PivotList" Width="40" SelectionChanged="PivotList_SelectionChanged" Visibility="Hidden"/>
             <Grid>
                 <Image Name="imageColor" Width="960" Height="540"/>
                 <Canvas x:Name="CanvasFaceParts"/>

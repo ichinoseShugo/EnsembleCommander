@@ -186,20 +186,11 @@ namespace EnsembleCommander
                 {
                     //文字のデータ
                     string data = main.SetTarget();
-                    Console.WriteLine(data);
+                    data = "15:17:32:9";
                     //バイトデータの文字コードを変更(androidを想定してUTF8に変更しているが変更の必要があるかどうかは未実験、必要ないかも)
-                    byte[] bytes = Encoding.UTF8.GetBytes(data);
+                    byte[] bytes = Encoding.ASCII.GetBytes(data);
                     //OutputStreamに文字列を送信
                     await socket.OutputStream.WriteAsync(bytes.AsBuffer());
-                    /*
-                    var ns = socket.InputStream;
-                    byte[] buffer = new byte[120];
-                    //InputStreamのデータを変数bufferに格納
-                    await socket.InputStream.ReadAsync(buffer.AsBuffer(), 120, InputStreamOptions.Partial);
-                    //受信したbyteデータを文字列に変換
-                    string str = Encoding.GetEncoding("ASCII").GetString(buffer);
-                    await socket.OutputStream.WriteAsync(bytes.AsBuffer());
-                    */
                 }
             }
             catch

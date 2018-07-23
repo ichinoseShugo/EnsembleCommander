@@ -98,6 +98,8 @@ namespace EnsembleCommander
         /// </summary>
         BluetoothWindow bWindow = null;
 
+        private System.Media.SoundPlayer startWavPlayer = new System.Media.SoundPlayer("..\\..\\..\\Resources\\StartTiming.wav");
+
         //Mainイベント-------------------------------------------------------------------
 
         /// <summary>
@@ -127,8 +129,7 @@ namespace EnsembleCommander
 
             //bluetooth制御ウィンドウの表示
             CreateBluetoothWindow();
-
-            SetTarget();
+            //startWavPlayer.Play();
         }
 
         /// <summary>
@@ -212,12 +213,19 @@ namespace EnsembleCommander
         /// <param name="e"></param>
         private void Player_Stopped(object sender, EventArgs e)
         {
-            Dispatcher.BeginInvoke(
-             new Action(() =>
-             {
-                 OffMidi.IsChecked = true;
-             })
-            );
+            if (LoopMidiCheck.IsChecked == true)
+            {
+            }
+            else
+            {
+                Dispatcher.BeginInvoke(
+                 new Action(() =>
+                 {
+                     OffMidi.IsChecked = true;
+                 })
+                );
+            }
+
             /*
             //転回したものを初期化
             foreach (var chord in midiManager.chordProgList[MODE_WHOLE]) chord.SetNotes(MODE_WHOLE);
@@ -228,21 +236,11 @@ namespace EnsembleCommander
             */
 
             // コードリストの初期化チェック
-            int i = 0;
-            foreach (var chord in midiManager.chordProgList[MODE_WHOLE])
-            {
-                chord.SetNotes(MODE_WHOLE);
-                //Console.WriteLine("MODE_WHOLE[0]:" + midiManager.chordProgList[MODE_WHOLE][i].NoteList[0].Note);
-                //Console.WriteLine("MODE_WHOLE[1]:" + midiManager.chordProgList[MODE_WHOLE][i].NoteList[1].Note);
-                //Console.WriteLine("MODE_WHOLE[2]:" + midiManager.chordProgList[MODE_WHOLE][i].NoteList[2].Note);
-                i++;
-            }
+            foreach (var chord in midiManager.chordProgList[MODE_WHOLE]) chord.SetNotes(MODE_WHOLE);
             foreach (var chord in midiManager.chordProgList[MODE_QUARTER]) chord.SetNotes(MODE_QUARTER);
             foreach (var chord in midiManager.chordProgList[MODE_ARPEGGIO]) chord.SetNotes(MODE_ARPEGGIO);
             foreach (var chord in midiManager.chordProgList[MODE_DELAY]) chord.SetNotes(MODE_DELAY);
             foreach (var chord in midiManager.chordProgList[MODE_FREE]) chord.SetNotes(MODE_FREE);
-
-
         }
 
         /// <summary>
@@ -276,8 +274,11 @@ namespace EnsembleCommander
         /// <param name="e"></param>
         private void OnQuarterTone_Checked(object sender, RoutedEventArgs e)
         {
-            midiManager.ExchangeTrack(MODE_QUARTER);
-            NowMode = MODE_QUARTER;
+            if (midiManager != null)
+            {
+                midiManager.ExchangeTrack(MODE_QUARTER);
+                NowMode = MODE_QUARTER;
+            }
         }
 
         /// <summary>
@@ -287,8 +288,11 @@ namespace EnsembleCommander
         /// <param name="e"></param>
         private void OnArpeggio_Checked(object sender, RoutedEventArgs e)
         {
-            midiManager.ExchangeTrack(MODE_ARPEGGIO);
-            NowMode = MODE_ARPEGGIO;
+            if (midiManager != null)
+            {
+                midiManager.ExchangeTrack(MODE_ARPEGGIO);
+                NowMode = MODE_ARPEGGIO;
+            }
         }
 
         /// <summary>
@@ -298,8 +302,11 @@ namespace EnsembleCommander
         /// <param name="e"></param>
         private void OnDelay_Checked(object sender, RoutedEventArgs e)
         {
-            midiManager.ExchangeTrack(MODE_DELAY);
-            NowMode = MODE_DELAY;
+            if (midiManager != null)
+            {
+                midiManager.ExchangeTrack(MODE_DELAY);
+                NowMode = MODE_DELAY;
+            }
         }
 
         /// <summary>
@@ -309,8 +316,11 @@ namespace EnsembleCommander
         /// <param name="e"></param>
         private void OnFree_Checked(object sender, RoutedEventArgs e)
         {
-            midiManager.ExchangeTrack(MODE_FREE);
-            NowMode = MODE_FREE;
+            if (midiManager != null)
+            {
+                midiManager.ExchangeTrack(MODE_FREE);
+                NowMode = MODE_FREE;
+            }
         }
 
         /// <summary>
@@ -358,7 +368,7 @@ namespace EnsembleCommander
         {
             //System.Console.WriteLine("sender:" + sender);
             //System.Console.WriteLine("e:" + e);
-            System.Console.WriteLine("minor");
+            Console.WriteLine("minor");
             if (NowTonality == "major")
             {
                 //midiManager.TurnMinor(player.MusicTime, NowMode);
@@ -951,19 +961,21 @@ namespace EnsembleCommander
         
         public string SetTarget()
         {
-            Target = dt.Add(sw.Elapsed).AddSeconds(5);
+            //startWavPlayer = new System.Media.SoundPlayer("..\\..\\..\\Resources\\start.wav");
+            Target = dt.Add(sw.Elapsed).AddMilliseconds(4210);
+            startWavPlayer.Play();
             InitPlayTimer();
-            Console.WriteLine();
+            Console.WriteLine("set");
             return Target.ToLongTimeString() + ":" + Target.Millisecond;
         }
 
         private void InitPlayTimer()
         {
+            Console.WriteLine("init play timer");
             //初期化、普通にする際はプロパティはNormalでよいかと
             playTimer = new DispatcherTimer(DispatcherPriority.Normal);
             //左から　日数、時間、分、秒、ミリ秒で設定　今回は10ミリ秒ごとつまり1秒あたり100回処理します
             playTimer.Interval = new TimeSpan(0, 0, 0, 0, 10);
-            //dispatcherTimer.Tick += new EventHandler(DispatcherTimer_Tick);
             playTimer.Tick += new EventHandler(PlayTimer_Tick);
             playTimer.Start();
         }
@@ -974,7 +986,7 @@ namespace EnsembleCommander
             if (now > Target)
             {
                 PlayMIDI();
-                Console.WriteLine("starg");
+                Console.WriteLine("start");
                 playTimer.Stop();
             }
         }
