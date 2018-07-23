@@ -29,9 +29,6 @@ namespace EnsembleCommander
 
         private MainWindow main;
 
-        /// <summary> 遅延計測用ストップウォッチ </summary>
-        private System.Diagnostics.Stopwatch stopWatch = new System.Diagnostics.Stopwatch();
-
         public BluetoothServer(int dOrder, RfcommDeviceDisplay dinfo, BluetoothWindow b, MainWindow m)
         {
             deviceOrder = dOrder;
@@ -185,9 +182,7 @@ namespace EnsembleCommander
                 if (socket != null)
                 {
                     //文字のデータ
-                    string data = main.SetTarget();
-                    data = "15:17:32:9";
-                    //バイトデータの文字コードを変更(androidを想定してUTF8に変更しているが変更の必要があるかどうかは未実験、必要ないかも)
+                    string data = main.SetTarget() + ":";
                     byte[] bytes = Encoding.ASCII.GetBytes(data);
                     //OutputStreamに文字列を送信
                     await socket.OutputStream.WriteAsync(bytes.AsBuffer());
