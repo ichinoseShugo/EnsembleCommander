@@ -164,6 +164,7 @@ namespace EnsembleCommander
         {
             if (data.name.CompareTo("v_sign") == 0 && !playstart)
             {
+                /*
                 UpdateNTPTime();
                 string target = SetTarget();
                 var list = bWindow.bServerList;
@@ -171,6 +172,13 @@ namespace EnsembleCommander
                 {
                     list[i].StartMidi(target);
                 }
+                */
+                Dispatcher.BeginInvoke(
+            new Action(() =>
+            {
+                bWindow.StartMidiButton.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
+            }
+            ));
                 playstart = true;
             }
             if (data.name.CompareTo("thumb_up") == 0)
@@ -981,7 +989,7 @@ namespace EnsembleCommander
         private void PlayTimer_Tick(object sender, EventArgs e)
         {
             DateTime now = dt.Add(sw.Elapsed);
-            Console.WriteLine(sw.Elapsed);
+            Console.WriteLine("now:"+now +" Target:"+Target+" sw:"+sw.Elapsed);
             if (now > Target)
             {
                 //PlayMIDI();
