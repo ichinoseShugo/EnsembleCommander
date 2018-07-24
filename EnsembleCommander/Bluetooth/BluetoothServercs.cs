@@ -13,7 +13,7 @@ using EnsembleCommander.Bluetooth;
 
 namespace EnsembleCommander
 {
-    class BluetoothServer
+    public class BluetoothServer
     {
         /// <summary> 接続された順番 </summary>
         public int deviceOrder;
@@ -175,15 +175,14 @@ namespace EnsembleCommander
         }
 
         /// <summary> Midiの開始 </summary>
-        public async void StartMidi()
+        public async void StartMidi(string target)
         {
             try
             {
                 if (socket != null)
                 {
                     //文字のデータ
-                    string data = main.SetTarget() + ":";
-                    byte[] bytes = Encoding.ASCII.GetBytes(data);
+                    byte[] bytes = Encoding.ASCII.GetBytes(target + ":");
                     //OutputStreamに文字列を送信
                     await socket.OutputStream.WriteAsync(bytes.AsBuffer());
                 }

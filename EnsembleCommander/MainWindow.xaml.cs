@@ -129,7 +129,6 @@ namespace EnsembleCommander
 
             //bluetooth制御ウィンドウの表示
             CreateBluetoothWindow();
-            //startWavPlayer.Play();
         }
 
         /// <summary>
@@ -156,15 +155,23 @@ namespace EnsembleCommander
 
         //RealSenseイベント-------------------------------------------------------------------
 
+        bool playstart = false;
         /// <summary>
         /// ジェスチャーが呼び出された時のイベント
         /// </summary>
         /// <param name="data"></param>
         void OnFiredGesture(PXCMHandData.GestureData data)
         {
-            if (data.name.CompareTo("v_sign") == 0)
+            if (data.name.CompareTo("v_sign") == 0 && !playstart)
             {
-                PlayMIDI();
+                UpdateNTPTime();
+                string target = SetTarget();
+                var list = bWindow.bServerList;
+                for (int i = 0; i < list.Count; i++)
+                {
+                    list[i].StartMidi(target);
+                }
+                playstart = true;
             }
             if (data.name.CompareTo("thumb_up") == 0)
             {
@@ -186,7 +193,7 @@ namespace EnsembleCommander
             }
             if (data.name.CompareTo("fist") == 0)
             {
-                StopMIDI();
+                //StopMIDI();
             }
             if (data.name.CompareTo("tap") == 0)
             {
@@ -342,7 +349,7 @@ namespace EnsembleCommander
         {
             //System.Console.WriteLine("sender:" + sender);
             //System.Console.WriteLine("e:" + e);
-            System.Console.WriteLine("major");
+            Console.WriteLine("major");
             if (NowTonality == "minor")
             {
                 //midiManager.TurnMajor(player.MusicTime, NowMode);
@@ -845,12 +852,12 @@ namespace EnsembleCommander
 
         public void PlayMIDI()
         {
-            player.Play(midiManager.domain);
+            if(player!=null) player.Play(midiManager.domain);
         }
 
         public void StopMIDI()
         {
-            player.Stop();
+            if (player != null) player.Stop();
         }
 
         /// <summary> ボタンなどの初期化 </summary>
@@ -953,7 +960,6 @@ namespace EnsembleCommander
         
         public string SetTarget()
         {
-            //startWavPlayer = new System.Media.SoundPlayer("..\\..\\..\\Resources\\start.wav");
             Target = dt.Add(sw.Elapsed).AddMilliseconds(4210);
             startWavPlayer.Play();
             InitPlayTimer();
@@ -975,9 +981,11 @@ namespace EnsembleCommander
         private void PlayTimer_Tick(object sender, EventArgs e)
         {
             DateTime now = dt.Add(sw.Elapsed);
+            Console.WriteLine(sw.Elapsed);
             if (now > Target)
             {
-                PlayMIDI();
+                //PlayMIDI();
+                OnMidi.IsChecked = true;
                 Console.WriteLine("start");
                 playTimer.Stop();
             }

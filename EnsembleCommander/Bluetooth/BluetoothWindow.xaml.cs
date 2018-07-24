@@ -26,7 +26,7 @@ namespace EnsembleCommander
         private MainWindow main;
         
         /// <summary> 複数のClientに対して用意するServer変数の格納リスト </summary>
-        private List<BluetoothServer> bServerList = new List<BluetoothServer>();
+        public List<BluetoothServer> bServerList = new List<BluetoothServer>();
         /// <summary> 選択されているデバイスの順番 </summary>
         private int selectedIndex = 0;
         /// <summary> 接続されているデバイスの数 </summary>
@@ -113,14 +113,14 @@ namespace EnsembleCommander
             }
             deviceCount--;
         }
+
         private void StartMidiButton_Click(object sender, RoutedEventArgs e)
         {
-            //if (PairingList.SelectedValue == null) return;
-
             main.UpdateNTPTime();
+            string target = main.SetTarget();
             for (int i = 0; i < bServerList.Count; i++)
             {
-                bServerList[i].StartMidi();
+                bServerList[i].StartMidi(target);
             }
         }
 

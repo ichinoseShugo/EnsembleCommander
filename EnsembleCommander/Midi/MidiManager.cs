@@ -50,11 +50,11 @@ namespace EnsembleCommander
         };
 
         //public string[] inputedChord = { "C", "Am", "F", "G", "Em", "F", "G", "C" }; //背景楽曲のコード進行配列
-        //public string[] inputedChord = { "C", "Am", "F", "G", "Em", "F", "G", "C", "C", "Am", "F", "G", "Em", "F", "G", "C" }; //背景楽曲のコード進行配列
+        public string[] inputedChord = { "C", "Am", "F", "G", "Em", "F", "G", "C", "C", "Am", "F", "G", "Em", "F", "G", "C" }; //背景楽曲のコード進行配列
         //public string[] inputedChord = { "C", "Em", "F", "G", "Em", "Am", "Dm", "G", "Am", "Em", "F", "Em", "Dm", "C", "G", "C" }; //背景楽曲のコード進行配列 
         //public string[] inputedChord = { "C", "G", "Am", "Em", "F", "C", "F", "G" }; //背景楽曲のコード進行配列 
         //public string[] inputedChord = { "D", "A", "Bm", "F#m", "G", "D", "G", "A" }; //背景楽曲のコード進行配列 
-        public string[] inputedChord = { "F", "Fm", "Em", "A7"}; //白松研においでよ
+        //public string[] inputedChord = { "F", "Fm", "Em", "A7"}; //白松研においでよ
         public byte KeyNoteNumber = 60;
         //public string KeyNote = "C";//将来的に使うかもしれない
 
