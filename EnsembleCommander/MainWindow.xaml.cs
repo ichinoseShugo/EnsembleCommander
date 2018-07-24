@@ -213,34 +213,26 @@ namespace EnsembleCommander
         /// <param name="e"></param>
         private void Player_Stopped(object sender, EventArgs e)
         {
-            if (LoopMidiCheck.IsChecked == true)
-            {
-            }
-            else
-            {
-                Dispatcher.BeginInvoke(
-                 new Action(() =>
-                 {
-                     OffMidi.IsChecked = true;
-                 })
-                );
-            }
-
-            /*
-            //転回したものを初期化
-            foreach (var chord in midiManager.chordProgList[MODE_WHOLE]) chord.SetNotes(MODE_WHOLE);
-            foreach (var chord in midiManager.chordProgList[MODE_QUARTER]) chord.SetNotes(MODE_QUARTER);
-            foreach (var chord in midiManager.chordProgList[MODE_ARPEGGIO]) chord.SetNotes(MODE_ARPEGGIO);
-            foreach (var chord in midiManager.chordProgList[MODE_DELAY]) chord.SetNotes(MODE_DELAY);
-            foreach (var chord in midiManager.chordProgList[MODE_FREE]) chord.SetNotes(MODE_FREE);
-            */
-
             // コードリストの初期化チェック
             foreach (var chord in midiManager.chordProgList[MODE_WHOLE]) chord.SetNotes(MODE_WHOLE);
             foreach (var chord in midiManager.chordProgList[MODE_QUARTER]) chord.SetNotes(MODE_QUARTER);
             foreach (var chord in midiManager.chordProgList[MODE_ARPEGGIO]) chord.SetNotes(MODE_ARPEGGIO);
             foreach (var chord in midiManager.chordProgList[MODE_DELAY]) chord.SetNotes(MODE_DELAY);
             foreach (var chord in midiManager.chordProgList[MODE_FREE]) chord.SetNotes(MODE_FREE);
+
+            Dispatcher.BeginInvoke(
+                new Action(() =>
+                {
+                    if (LoopMidiCheck.IsChecked == true)
+                    {
+                        OnMidi.IsChecked = true;
+                    }
+                    else
+                    {
+                        OffMidi.IsChecked = true;
+                    }
+                }
+                ));
         }
 
         /// <summary>
