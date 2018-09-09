@@ -8,12 +8,6 @@ using System.Windows.Shapes;
 //midi
 using NextMidi.Time;
 
-//bluetooth
-using EnsembleCommander.Bluetooth;
-using Windows.Devices.Bluetooth;
-using Windows.Devices.Bluetooth.Rfcomm;
-using Windows.Networking.Sockets;
-using Windows.Storage.Streams;
 using System.Windows.Threading;
 
 namespace EnsembleCommander
@@ -108,7 +102,7 @@ namespace EnsembleCommander
         public MainWindow()
         {
             InitializeComponent();
-            Top = 90;
+            Top = 0;
             Left = 0;
         }
 
@@ -123,12 +117,13 @@ namespace EnsembleCommander
             InitializeView();
             //RealSenseの初期化
             IsConnectRealSense = InitializeRealSense();
-            ConnectCheck.Content = IsConnectRealSense;//バインド予定
+            //ConnectCheck.Content = IsConnectRealSense;//バインド予定
             //WPFのオブジェクトがレンダリングされるタイミング(およそ1秒に50から60)に呼び出される
             CompositionTarget.Rendering += CompositionTarget_Rendering;
 
             //bluetooth制御ウィンドウの表示
             CreateBluetoothWindow();
+            rsw.Start();
         }
 
         /// <summary>
@@ -154,17 +149,16 @@ namespace EnsembleCommander
         }
 
         //RealSenseイベント-------------------------------------------------------------------
-
-        bool playstart = false;
+        
         /// <summary>
         /// ジェスチャーが呼び出された時のイベント
         /// </summary>
         /// <param name="data"></param>
         void OnFiredGesture(PXCMHandData.GestureData data)
         {
+            /*
             if (data.name.CompareTo("v_sign") == 0 && !playstart)
             {
-                /*
                 UpdateNTPTime();
                 string target = SetTarget();
                 var list = bWindow.bServerList;
@@ -172,21 +166,20 @@ namespace EnsembleCommander
                 {
                     list[i].StartMidi(target);
                 }
-                */
                 Dispatcher.BeginInvoke(
             new Action(() =>
             {
-                bWindow.StartMidiButton.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
+                ////bWindow.StartMidiButton.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
             }
             ));
-                playstart = true;
+                //playstart = true;
             }
             if (data.name.CompareTo("thumb_up") == 0)
             {
                 Dispatcher.BeginInvoke(
             new Action(() =>
             {
-                Major.IsChecked = true;
+                //Major.IsChecked = true;
             }
             ));
             }
@@ -195,7 +188,7 @@ namespace EnsembleCommander
                 Dispatcher.BeginInvoke(
                             new Action(() =>
                             {
-                                Minor.IsChecked = true;
+                                //Minor.IsChecked = true;
                             }
                             ));
             }
@@ -207,6 +200,7 @@ namespace EnsembleCommander
             {
                 midiManager.SetOnNote(player.MusicTime);
             }
+            */
         }
 
         //MIDIイベント-------------------------------------------------------------------
@@ -229,12 +223,12 @@ namespace EnsembleCommander
         private void Player_Stopped(object sender, EventArgs e)
         {
             // コードリストの初期化チェック
-            foreach (var chord in midiManager.chordProgList[MODE_WHOLE]) chord.SetNotes(MODE_WHOLE);
-            foreach (var chord in midiManager.chordProgList[MODE_QUARTER]) chord.SetNotes(MODE_QUARTER);
-            foreach (var chord in midiManager.chordProgList[MODE_ARPEGGIO]) chord.SetNotes(MODE_ARPEGGIO);
-            foreach (var chord in midiManager.chordProgList[MODE_DELAY]) chord.SetNotes(MODE_DELAY);
-            foreach (var chord in midiManager.chordProgList[MODE_FREE]) chord.SetNotes(MODE_FREE);
-
+            //foreach (var chord in midiManager.chordProgList[MODE_WHOLE]) chord.SetNotes(MODE_WHOLE);
+            //foreach (var chord in midiManager.chordProgList[MODE_QUARTER]) chord.SetNotes(MODE_QUARTER);
+            //foreach (var chord in midiManager.chordProgList[MODE_ARPEGGIO]) chord.SetNotes(MODE_ARPEGGIO);
+            //foreach (var chord in midiManager.chordProgList[MODE_DELAY]) chord.SetNotes(MODE_DELAY);
+            //foreach (var chord in midiManager.chordProgList[MODE_FREE]) chord.SetNotes(MODE_FREE);
+            /*
             Dispatcher.BeginInvoke(
                 new Action(() =>
                 {
@@ -248,6 +242,13 @@ namespace EnsembleCommander
                     }
                 }
                 ));
+            */
+            int min = DateTime.Now.Minute;
+            int sec = DateTime.Now.Second;
+            int mill = DateTime.Now.Millisecond;
+            DateTime now = dt.Add(sw.Elapsed);
+            Console.WriteLine("pc stop time in Player_Stopped event : " + min + ":"+ sec + ":" + mill);
+            Console.WriteLine("ntp stop time in Player_Stopped event : " + now.Minute + ":" + now.Second + ":" + now.Millisecond);
         }
 
         /// <summary>
@@ -479,7 +480,7 @@ namespace EnsembleCommander
             // 手の検出の設定
             var config = handAnalyzer.CreateActiveConfiguration();
             config.EnableSegmentationImage(true);
-            config.EnableGesture("v_sign");
+            //config.EnableGesture("v_sign");
             config.EnableGesture("thumb_up");
             config.EnableGesture("thumb_down");
             //config.EnableGesture("tap");
@@ -680,10 +681,12 @@ namespace EnsembleCommander
                 && System.Math.Pow(System.Math.Pow(RightCenter.x - preRightCenter.x, 2)                 // 手のひらの速度が0.6m/s以上
                                    + System.Math.Pow(RightCenter.y - preRightCenter.y, 2)
                                    + System.Math.Pow(RightCenter.z * 1000 - preRightCenter.z * 1000, 2), 0.5) > 0.01
+                                   && rsw.ElapsedMilliseconds > 250
                )
             {
                 //tap音を出力
                 midiManager.SetOnNote(player.MusicTime);
+                rsw.Restart();
             }
 
             // ユーザの左手でタップ
@@ -856,6 +859,18 @@ namespace EnsembleCommander
                 * Score.Width;
             CurrentLine.X1 = pos;
             CurrentLine.X2 = pos;
+            /*
+            if (player.MusicTime.Tick >= MidiManager.TICK_UNIT * player.MusicTime.Measure)
+            {
+                int sec = DateTime.Now.Second;
+                int mill = DateTime.Now.Millisecond;
+                DateTime now = dt.Add(sw.Elapsed);
+                DateTime now2 = dt.AddMilliseconds(sw.ElapsedMilliseconds);
+                Console.WriteLine("local stop : " + sec + ":" + mill);
+                Console.WriteLine("ntp stop : " + now.Second + ":" + now.Millisecond);
+                Console.WriteLine("ntp stop : " + now2.Second + ":" + now2.Millisecond);
+            }
+            */
         }
 
         public void PlayMIDI()
@@ -904,6 +919,7 @@ namespace EnsembleCommander
         public DateTime Target;
         public DateTime dt = new DateTime(1900, 1, 1);
         public System.Diagnostics.Stopwatch sw = new System.Diagnostics.Stopwatch();
+        public System.Diagnostics.Stopwatch rsw = new System.Diagnostics.Stopwatch();
         DispatcherTimer playTimer;
 
         public void UpdateNTPTime()
@@ -963,6 +979,9 @@ namespace EnsembleCommander
             dt = dt.AddMilliseconds(mill);
             //グリニッジ標準時から日本時間への変更
             dt = dt.AddHours(9);
+
+            Console.WriteLine("ntp time in UpdateNTPTime" + dt.ToString());
+            Console.WriteLine("local time in UpdateNTPTime" + DateTime.Now.ToString());
             sw.Start();
         }
         
@@ -971,8 +990,8 @@ namespace EnsembleCommander
             Target = dt.Add(sw.Elapsed).AddMilliseconds(4210);
             startWavPlayer.Play();
             InitPlayTimer();
-            Console.WriteLine("set");
-            return Target.ToLongTimeString() + ":" + Target.Millisecond;
+            //return ":";
+            return Target.ToLongTimeString() + ":" + Target.Millisecond + ":";
         }
 
         private void InitPlayTimer()
@@ -989,14 +1008,17 @@ namespace EnsembleCommander
         private void PlayTimer_Tick(object sender, EventArgs e)
         {
             DateTime now = dt.Add(sw.Elapsed);
-            Console.WriteLine("now:"+now +" Target:"+Target+" sw:"+sw.Elapsed);
             if (now > Target)
             {
-                //PlayMIDI();
+                PlayMIDI();
                 OnMidi.IsChecked = true;
-                Console.WriteLine("start");
                 playTimer.Stop();
+                int sec = DateTime.Now.Second;
+                int mill = DateTime.Now.Millisecond;
+                Console.WriteLine("local start : " + sec + ":" + mill);
+                Console.WriteLine("ntp start : " + now.Second + ":" + now.Millisecond);
             }
+            //Console.WriteLine("now:" + now + " Target:" + Target + " sw:" + sw.Elapsed);
         }
     }
 }
