@@ -121,6 +121,7 @@ namespace EnsembleCommander
             for (int i = 0; i < bServerList.Count; i++)
             {
                 bServerList[i].StartMidi(target);
+                Console.WriteLine("bserver : " + i);
             }
         }
 

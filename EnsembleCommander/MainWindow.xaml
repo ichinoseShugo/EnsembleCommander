@@ -15,7 +15,7 @@
                 </StackPanel>
                 <CheckBox x:Name="LoopMidiCheck" Content="MIDI Loop" Margin="5"/>
                 <StackPanel Orientation="Horizontal">
-                    <RadioButton x:Name="OnWholeTone" Content="Whole" Margin="5" Checked="OnWholeTone_Checked"/>
+                    <RadioButton x:Name="OnWholeTone" Content="Whole" Margin="5" Checked="OnWholeTone_Checked" />
                     <RadioButton x:Name="OnQuarterTone" IsChecked="True" Content="Quarter" Margin="5" Checked="OnQuarterTone_Checked"/>
                     <RadioButton x:Name="OnArpeggio" Content="Arpeggio" Margin="5" Checked="OnArpeggio_Checked"/>
                     <RadioButton x:Name="OnDelay" Content="Delay" Margin="5" Checked="OnDelay_Checked"/>

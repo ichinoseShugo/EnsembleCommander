@@ -183,6 +183,7 @@ namespace EnsembleCommander
                 {
                     //文字のデータ
                     byte[] bytes = Encoding.ASCII.GetBytes(target);
+                    //bytes = Encoding.ASCII.GetBytes("15:55:58:77:");
                     Console.WriteLine("target:"+target);
                     //OutputStreamに文字列を送信
                     await socket.OutputStream.WriteAsync(bytes.AsBuffer());
